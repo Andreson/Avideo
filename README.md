@@ -1,178 +1,293 @@
-# Fork projeto WWBN/Avideo
-
-
-[فارسی](README.fa.md)
-
-# First thing...
-
-I thank God for graciously, through His mercy, giving me all the necessary knowledge acquired throughout my life and throughout the development of this project. It is only through His grace and provision that this was possible, and I am truly grateful for His presence every step of the way.
-
-> **For of Him, and through Him, and to Him, are all things: to whom be glory forever. Amen.**
-> `Apostle Paul in Romans 11:36`
-
 <p align="center">
-  <img src="https://avideo.tube/website/assets/151/images/avideo_platform.png"/>
+  <img src="https://avideo.tube/website/assets/151/images/avideo_platform.png" alt="AVideo Platform" width="480"/>
 </p>
 
 <p align="center">
- 
   <a href="https://github.com/WWBN/AVideo/actions/workflows/tests.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/WWBN/AVideo/tests.yml?style=flat-square&label=tests" alt="Tests Status"/>
+    <img src="https://img.shields.io/github/actions/workflow/status/WWBN/AVideo/tests.yml?style=flat-square&label=tests" alt="Status dos testes"/>
   </a>
   <a href="https://github.com/WWBN/AVideo/stargazers">
-    <img src="https://img.shields.io/github/stars/WWBN/AVideo?style=flat-square" alt="GitHub Stars"/>
+    <img src="https://img.shields.io/github/stars/WWBN/AVideo?style=flat-square" alt="Estrelas no GitHub"/>
   </a>
   <a href="https://github.com/WWBN/AVideo/network/members">
-    <img src="https://img.shields.io/github/forks/WWBN/AVideo?style=flat-square" alt="GitHub Forks"/>
+    <img src="https://img.shields.io/github/forks/WWBN/AVideo?style=flat-square" alt="Forks no GitHub"/>
   </a>
-  <br/>
   <a href="https://github.com/WWBN/AVideo/commits/master">
-    <img src="https://img.shields.io/github/last-commit/WWBN/AVideo?style=flat-square" alt="Last Commit"/>
-  </a>
-  <a href="https://github.com/WWBN/AVideo/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/WWBN/AVideo?style=flat-square" alt="Contributors"/>
+    <img src="https://img.shields.io/github/last-commit/WWBN/AVideo?style=flat-square" alt="Último commit"/>
   </a>
   <a href="https://github.com/WWBN/AVideo">
-    <img src="https://img.shields.io/github/languages/code-size/WWBN/AVideo?style=flat-square" alt="Code Size"/>
+    <img src="https://img.shields.io/github/languages/code-size/WWBN/AVideo?style=flat-square" alt="Tamanho do código"/>
   </a>
 </p>
 
-### [!IMPORTANT] Domain Update Notice
+# AVideo Platform
 
-Our previous domains — **youphptube.com** and **youphp.tube** — are being retired following a dispute initiated by **Google LLC (YouTube)**.  
-Although we firmly believe that **YouPHPTube** has always been an **independent, open-source project**, created to empower developers and organizations to host their own video platforms, we have decided to **respect the process and move forward peacefully**.  
+> Este repositório é um **fork** do projeto original [WWBN/AVideo](https://github.com/WWBN/AVideo).
 
-🆕 **Please update your bookmarks and references to the new official domain:**  
+O **AVideo** é uma plataforma completa de streaming de vídeo, construída em **PHP 8.1** sobre **Apache**, pensada para criadores de conteúdo, empresas e desenvolvedores que precisam hospedar, gerenciar e monetizar vídeo sob demanda e transmissões ao vivo com infraestrutura própria. A plataforma é dividida em três componentes principais que operam de forma integrada — o **Streamer** (aplicação web que serve o catálogo, o player e a administração), o **Encoder** (worker de transcodificação baseado em FFmpeg que converte uploads para formatos compatíveis com a web) e o **Live Server** (servidor Nginx com módulo RTMP que recebe transmissões ao vivo e gera HLS em tempo real) — e conta com um motor de mais de 80 plugins que adicionam recursos como streaming HLS criptografado, chat ao vivo, monetização por assinatura e *pay-per-view*, integração com múltiplos provedores de armazenamento em nuvem, anúncios em vídeo e login social.
 
-👉 [https://streamphp.com/](https://streamphp.com/)  
+> ⚠️ **Uso ético**: este software deve ser usado exclusivamente para fins lícitos. A criação de conteúdo sexualmente explícito, pornográfico ou de temática adulta usando esta plataforma é estritamente proibida pelos termos do projeto original.
 
-Thank you for your continued support and for standing with open-source freedom.
+## Índice
 
+- [Sobre o projeto](#sobre-o-projeto)
+- [Arquitetura](#arquitetura)
+  - [Diagrama de contexto (C1)](#diagrama-de-contexto-c1)
+  - [Diagrama de containers (C2)](#diagrama-de-containers-c2)
+  - [Diagrama de infraestrutura](#diagrama-de-infraestrutura)
+- [Tecnologias utilizadas](#tecnologias-utilizadas)
+- [Como executar com Docker](#como-executar-com-docker)
+- [Requisitos para instalação manual](#requisitos-para-instalação-manual)
+- [Suporte e documentação](#suporte-e-documentação)
+- [Licença](#licença)
 
-## Introduction to AVideo
+## Sobre o projeto
 
-AVideo is a versatile and advanced video streaming platform tailored for individual content creators, businesses, and developers alike. It stands out with its robust suite of features that enable users to host, manage, and monetize video content with remarkable efficiency. This introduction aims to shed light on the key functionalities of AVideo, highlighting how each feature can enhance user experience and content outreach. For a more detailed understanding, please follow the provided links.
+Principais características da plataforma:
 
-## 🌟 Key Features of AVideo
+- **Segurança de conteúdo**: streaming HLS criptografado, tanto para vídeo sob demanda quanto para transmissões ao vivo, com controle de chaves de acesso.
+- **Live streaming com gravação**: transmissões ao vivo com chat integrado e gravação automática para acesso posterior.
+- **Restream / multi-broadcast**: retransmissão simultânea da live para múltiplas plataformas externas (YouTube Live, Facebook Live, etc.).
+- **Canais e playlists de usuários**: criadores podem organizar seu próprio canal, playlists e categorias temáticas.
+- **Monetização**: assinaturas recorrentes, *pay-per-view*, anúncios em vídeo (VAST/VMAP) e integração com múltiplos gateways de pagamento.
+- **Armazenamento escalável**: suporte nativo a S3, Backblaze B2, BunnyCDN e FTP para entrega de vídeo em alta escala.
+- **API e integrações**: API REST documentada (Swagger) para integração com aplicações de terceiros.
+- **Download e visualização offline**: opção de download protegido de vídeos para uso offline.
 
-1. **🔒 Advanced Security & Content Protection**: Safeguard your video content with AVideo’s [encrypted HLS streaming](https://github.com/WWBN/AVideo/wiki/VideoHLS-Plugin), protecting both on-demand and live streams. Encryption keys are securely managed to ensure only authorized players can access your content, offering a strong defense against unauthorized access.
+## Arquitetura
 
-2. **📡 Secure Livestreaming with Recording**: Host live events with confidence using AVideo’s [secure livestreaming](https://github.com/WWBN/AVideo/wiki/How-to-make-a-live-stream) capabilities, backed by encrypted HLS protection. Engage viewers in real-time, record live streams for future access, and enhance interaction through integrated [chat features](https://github.com/WWBN/AVideo/wiki/Chat2-Plugin) for a more immersive experience.
+Os diagramas abaixo seguem o modelo **C4** (Contexto → Containers) e foram gerados a partir da análise do código-fonte do projeto (`docker-compose.yml`, `composer.json`, `Dockerfile`, `Dockerfile.live` e a estrutura de `plugin/`/`objects/`).
 
-3. **🔄 Restreaming & Multi-Platform Broadcasting**: Extend your livestream’s reach by rebroadcasting content across multiple platforms simultaneously. [Restreaming capabilities](https://github.com/WWBN/AVideo/wiki/Live-Plugin#restream) make it easy to connect with audiences wherever they are.
+### Diagrama de contexto (C1)
 
-4. **📋 User-Generated Channels & Playlists**: Empower users to create custom channels and playlists, helping organize and promote thematic content curation. Boost engagement and community-building by letting viewers personalize their viewing experience.
+Mostra como os três perfis de usuário interagem com o AVideo e quais serviços externos a plataforma consome.
 
-5. **💰 Monetization Options**: Maximize revenue with AVideo’s flexible [subscription](https://github.com/WWBN/AVideo/wiki/Subscription-Plugin) and [Pay-Per-View](https://github.com/WWBN/AVideo/wiki/PayPerView-Plugin) options. Expand monetization opportunities, allowing users to support premium content and exclusive live events.
+```mermaid
+flowchart LR
+    Espectador(["Espectador"])
+    Criador(["Criador de Conteúdo"])
+    Admin(["Administrador"])
 
-6. **📢 Ad Integration & Promotion**: Increase revenue with targeted [video ad placements](https://github.com/WWBN/AVideo/wiki/AD_Server-Plugin) and support for [VAST and VMAP ads](https://github.com/WWBN/AVideo/wiki/GoogleAds_IMA---Videos-Ads-on-your-page), enhancing your platform's profitability and reach.
+    AVideo["AVideo Platform<br/>(Streamer · Encoder · Live)"]
 
-7. **☁️ Scalable Cloud Storage**: Rely on secure and scalable storage solutions with options like S3, B2, FTP, and more, ensuring seamless video delivery even during high traffic peaks. [Learn More](https://github.com/WWBN/AVideo/wiki/Storage-Options).
+    Google["Google<br/>OAuth · YouTube · Ads"]
+    Social["Redes Sociais<br/>Facebook · X · LinkedIn"]
+    Pagamentos["Pagamentos<br/>PayPal · Stripe · AuthorizeNet"]
+    Storage["Storage em Nuvem<br/>S3 · Backblaze B2 · BunnyCDN"]
+    Push["Push / E-mail<br/>OneSignal · SMTP"]
+    Restream["Restream Externo<br/>YouTube Live · Facebook Live"]
 
-8. **🔗 Third-Party Integration & API**: Extend platform capabilities by connecting third-party apps with AVideo’s [API](https://github.com/WWBN/AVideo/wiki/AVideo-Platform-API), offering flexibility for tailored integrations and custom development.
+    Espectador -- HTTPS --> AVideo
+    Criador -- "HTTPS / RTMP" --> AVideo
+    Admin -- HTTPS --> AVideo
 
-9. **📥 Offline Viewing & Secure Downloads**: Allow viewers to download and watch videos offline with AVideo’s [offline video saving](https://github.com/WWBN/AVideo/wiki/VideoOffline-Plugin) feature, while maintaining strict [content protection](https://github.com/WWBN/AVideo/wiki/VideoHLS-Plugin#download-protection) to prevent unauthorized distribution.
+    AVideo -- OAuth2/REST --> Google
+    AVideo -- OAuth2/REST --> Social
+    AVideo -- "REST/Webhook" --> Pagamentos
+    AVideo -- "S3 API/FTP" --> Storage
+    AVideo -- "REST/SMTP" --> Push
+    AVideo -- RTMP --> Restream
+```
 
-## Your Comprehensive Video Streaming Solution
+### Diagrama de containers (C2)
 
-At AVideo, we provide more than just a platform; we offer a comprehensive solution for hosting, managing, monetizing, and expanding your video content. Embrace the future of video streaming and unlock the full potential of your content with AVideo.
+Detalha os serviços que sobem via `docker-compose.yml` e como eles se relacionam dentro do sistema.
 
-# 📚 How AVideo is Organized
+```mermaid
+flowchart TB
+    Espectador2(["Espectador"])
+    Criador2(["Criador"])
+    Admin2(["Administrador"])
 
-AVideo is a comprehensive platform, divided into three key components:
+    subgraph SYS["AVideo Platform (Docker Compose)"]
+        WebApp["Web App (Streamer)<br/>PHP 8.1 / Apache"]
+        LiveServer["Live Server<br/>Nginx-RTMP + FFmpeg"]
+        Encoder["Encoder (worker)<br/>PHP + FFmpeg"]
+        PluginEngine["Plugin Engine<br/>80+ plugins"]
+        DB[("MariaDB Principal")]
+        DBEncoder[("MariaDB Encoder")]
+        Memcached[("Memcached")]
+        Volume[["Volume HLS / Vídeos"]]
+    end
 
-- **Streamer**: The core component for playing and managing videos. It acts as the main interface for users to interact with video content.
-- **Encoder**: This tool converts your videos into a web-compatible format, ensuring they are ready for streaming on various devices and platforms.
-- **Live Server**: Specifically designed for broadcasting live videos, this component is essential for real-time streaming capabilities.
+    Espectador2 -- HTTPS --> WebApp
+    Criador2 -- "upload HTTPS" --> WebApp
+    Criador2 -- RTMP --> LiveServer
+    Admin2 -- HTTPS --> WebApp
 
-## 🔍 Why Do I Need the Encoder?
+    WebApp -- SQL --> DB
+    WebApp -- cache --> Memcached
+    WebApp -- "invoca plugins" --> PluginEngine
+    WebApp -- "envia job" --> Encoder
+    Encoder -- "fila/status" --> DBEncoder
+    Encoder -. "notifica conclusão" .-> WebApp
 
-Installing your own encoder can be beneficial for several reasons:
+    LiveServer -- "grava HLS" --> Volume
+    LiveServer -- "valida chave" --> WebApp
 
-- **Faster Performance**: Having your own encoder might provide faster processing compared to using a public encoder server.
-- **Privacy**: If privacy in video processing is a concern, a private encoder ensures that your content remains confidential.
-- **Network Compatibility**: In cases where your server is on a private network without a public IP address or uses an IP within specific ranges (10.0.0.0/8, 127.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), having your own encoder is essential for proper communication with the streamer site.
+    PluginEngine -- "integrações (S3, pagamentos,<br/>login social, push, SMTP)" --> Externos["Serviços Externos"]
+```
 
-## 📜 Agreement on the Purpose of Software Installation
+### Diagrama de infraestrutura
 
-AVideo is dedicated to promoting positive and ethical content creation. As such, we firmly stipulate that:
+Topologia de implantação sugerida — o `docker-compose.yml` atual cobre o cluster de aplicação e a camada de dados num único host; a camada de borda (CDN, WAF, load balancer) é recomendada para produção em escala.
 
-- This Software must be used for Good, never for Evil.
-- The creation of content related to sexually explicit material, pornography, or adult themes using this software is strictly prohibited.
-- Any such usage is against the values and principles of our platform and is not permitted under any circumstances.
+```mermaid
+flowchart TB
+    Usuarios(["Usuários (Web/Mobile)"])
+    Criadores(["Criadores (OBS/RTMP)"])
 
-# 🌐 Demonstration Sites
+    DNS["DNS"]
+    WAF["WAF / Anti-DDoS"]
+    LB["Load Balancer<br/>reverse proxy · TLS"]
+    CDN["CDN<br/>cache de vídeo/estático"]
 
-Explore our AVideo Platform through various demo sites, each showcasing different features and functionalities:
+    subgraph CLUSTER["Application Cluster"]
+        App["Web App"]
+        Live["Live Server"]
+        Enc["Encoder"]
+    end
 
-- **[AVideo Platform Full-Access Demo](http://demo.avideo.com/)**
-  Experience full access to our demo site, including admin privileges.
-  **Admin Access**:
-  - **User**: admin
-  - **Password**: 123
-  **Non-Admin Access** (for commenting only):
-  - **User**: test
-  - **Password**: test
+    DBPrincipal[("MariaDB Principal")]
+    DBEnc[("MariaDB Encoder")]
+    Mem[("Memcached")]
+    Vol[["Volume / Storage local (SSD)"]]
 
-- **[AVideo Platform Flix Demo](https://flix.avideo.com/)**
-  Discover the Flix Style site of AVideo Platform. Subscribe with real money via PayPal to access private videos.
-  **Test User Access**:
-  - **User**: test
-  - **Password**: test
+    CloudStorage["Cloud Storage<br/>S3 · B2"]
+    Integracoes["Pagamentos · OAuth · SMTP · Push"]
+    Observabilidade["Logs · Métricas · Backups"]
 
-- **[AVideo Platform Gallery Demo](https://tutorials.avideo.com/)**
-  Explore our Video Gallery, which also serves as a tutorial site. Engage with the content through login, subscription, likes, dislikes, and comments. (Note: Uploading videos is not permitted.)
+    Usuarios -- "dinâmico/HTML" --> WAF
+    Usuarios -- "estático/HLS" --> CDN
+    Criadores -- "upload HTTPS" --> WAF
+    Criadores -. "RTMP direto :1935" .-> Live
 
-# 🖥️ Server Requirements
+    DNS --> WAF --> LB
+    CDN -- "cache miss" --> LB
+    LB --> App
+    LB --> Live
 
-Ensure your server meets the following prerequisites to run the AVideo Platform efficiently. All required tools are freely available.
+    App --> DBPrincipal
+    App --> Mem
+    App --> Vol
+    Enc --> DBEnc
+    Live --> Vol
 
-[![Minimum PHP Version](https://img.shields.io/badge/PHP-8.0%2B-blue)](https://php.net/) - **PHP**: Version 8.0 or higher is required for optimal performance and security.
+    Vol -. sync/offload .-> CloudStorage
+    CLUSTER -. egress .-> Integracoes
+    CLUSTER -. logs/backup .-> Observabilidade
+```
 
-[![Minimum MySQL Version](https://img.shields.io/badge/MySQL-5.0%2B-blue)](https://www.mysql.com/) - **MySQL**: AVideo requires MySQL version 5.0 or higher to manage its databases effectively.
+## Tecnologias utilizadas
 
-[![Minimum Apache Version](https://img.shields.io/badge/Apache-2.x%20%28mod__rewrite%29-blue)](https://httpd.apache.org/) - **Apache**: Utilize Apache web server version 2.x with mod_rewrite module enabled for URL rewriting capabilities.
+| Categoria | Tecnologia | Finalidade |
+|---|---|---|
+| **Linguagem / Runtime** | PHP 8.1 | Linguagem principal da aplicação |
+| **Servidor Web** | Apache 2.x (mod_rewrite) | Servidor HTTP/HTTPS do Streamer |
+| **Live Streaming** | Nginx + nginx-rtmp-module + FFmpeg | Ingestão RTMP e geração de HLS ao vivo |
+| **Transcodificação** | FFmpeg | Conversão de vídeos para formatos web (HLS/MP4) |
+| **Banco de Dados** | MariaDB | Persistência de dados da aplicação e da fila do encoder |
+| **Cache** | Memcached | Cache de sessões e objetos |
+| **Frontend / Player** | Video.js + hls.js | Player de vídeo com suporte a HLS, VR, Chromecast e AirPlay |
+| **Frontend / UI** | Bootstrap 5, jQuery, jQuery UI | Interface e componentes visuais |
+| **Frontend / Editor** | TinyMCE, CodeMirror | Edição de texto rico e de código |
+| **Gráficos** | Chart.js | Dashboards e relatórios administrativos |
+| **Comunicação em tempo real** | Socket.IO, ReactPHP (amp, react/socket) | Chat ao vivo e eventos assíncronos |
+| **Autenticação social** | HybridAuth, Google API Client | Login via Google, Facebook, LinkedIn, Apple, entre outros |
+| **Pagamentos** | PayPal, Stripe, AuthorizeNet SDKs | Processamento de assinaturas, PPV e doações |
+| **Armazenamento em nuvem** | AWS SDK PHP, Backblaze B2 SDK, BunnyCDN Storage | Upload e entrega de mídia escalável |
+| **Notificações** | OneSignal PHP API, PHPMailer | Push notifications e e-mail transacional |
+| **Segurança** | HTMLPurifier, phpseclib, OTPHP | Sanitização de HTML, criptografia e autenticação de dois fatores |
+| **Logs** | Monolog | Registro estruturado de eventos da aplicação |
+| **Documentação de API** | Swagger PHP (zircote/swagger-php) | Especificação OpenAPI da API REST |
+| **Infraestrutura** | Docker, Docker Compose | Orquestração dos serviços (app, live, bancos, cache) |
+| **Administração de banco** | phpMyAdmin | Interface web opcional para gestão do MariaDB |
+| **CI/CD** | GitHub Actions | Build e publicação automatizada das imagens Docker |
 
-[![GitHub release](https://img.shields.io/github/v/release/WWBN/AVideo?include_prereleases&label=AVideo&style=flat-square)](https://github.com/WWBN/AVideo/releases) - Stay up-to-date with the latest releases of AVideo.
+## Como executar com Docker
 
-For an in-depth look at the hardware requirements and additional server configurations, please visit our comprehensive guide: [AVideo Platform Hardware Requirements](https://github.com/WWBN/AVideo/wiki/AVideo-Platform-Hardware-Requirements).
+### Pré-requisitos
 
-# Crucial Advisory: Strictly Avoid Using Control Panels for Installation
+- [Docker](https://docs.docker.com/get-docker/) e [Docker Compose](https://docs.docker.com/compose/install/) instalados
+- Portas `80`, `443`, `1935`, `2053`, `3000`, `8080` e `8443` livres no host (ajustáveis via variáveis de ambiente)
 
-**Important**: For the installation of the Streamer, Encoder, and Livestream components, it is imperative to use a Linux distribution, specifically Ubuntu, **without any type of control panel**. This includes avoiding panels like cPanel, Plesk, Webmin, VestaCP, and similar.
+### Passo a passo
 
-Control panels significantly interfere with the necessary system access and processes required for a successful installation. They restrict the installation of essential libraries and the compilation of critical software, such as Nginx for the Livestream component.
+1. **Clone o repositório**
 
-**Please be advised**: Installing our system on a server with any control panel is highly discouraged and is likely to result in installation failure. We cannot provide support or guarantee success in such scenarios. For a smooth and functional installation, it is essential to follow this guideline strictly.
+   ```bash
+   git clone https://github.com/WWBN/AVideo.git
+   cd AVideo
+   ```
 
-# Installation Guide for AVideo on Ubuntu
+2. **Copie o arquivo de variáveis de ambiente**
 
-Embarking on the installation of AVideo on your Ubuntu system? You're in the right place. Our comprehensive tutorials are tailored to guide you through every step of the installation process on various Ubuntu versions, including a Docker-based setup.
+   ```bash
+   cp env.example .env
+   ```
 
-🎬 **Video Tutorial**
-- For a foundational understanding, check out our [Video Tutorial](https://tutorials.avideo.com/video/10/streamer-and-encoder). Though it's based on older versions of AVideo, it provides an excellent introduction to the installation process.
+3. **Ajuste as variáveis no `.env`** — no mínimo, defina:
 
-🐧 **Ubuntu-Specific Installation Guides**
-- Tailor your installation to your specific Ubuntu version:
-  - 📘 [Ubuntu 16.04 Guide](https://github.com/WWBN/AVideo/wiki/How-to-install-LAMP,-FFMPEG-and-Git-on-a-fresh-Ubuntu-16.x-For-AVideo-Platform-version-4.x-or-newer)
-  - 📗 [Ubuntu 18.04 Guide](https://github.com/WWBN/AVideo/wiki/How-to-install-LAMP,-FFMPEG-and-Git-on-a-fresh-Ubuntu-18.x-for-AVideo-Platform-version-4.x-or-newer)
-  - 📙 [Ubuntu 20.04 Guide](https://github.com/WWBN/AVideo/wiki/How-to-install-LAMP,-FFMPEG-and-Git-on-a-fresh-Ubuntu-20.x-for-AVideo-Platform-version-11.x-or-newer)
-  - 📔 [Ubuntu 22.04 Guide](https://github.com/WWBN/AVideo/wiki/How-to-install-LAMP,-FFMPEG-and-Git-on-a-fresh-Ubuntu-22.x-for-AVideo-Platform-version-11.x-or-newer)
-  - 📒 [Ubuntu 24.04 Guide](https://github.com/WWBN/AVideo/wiki/How-to-install-LAMP,-FFMPEG-and-Git-on-a-fresh-Ubuntu-24.x-for-AVideo-Platform)
+   | Variável | Descrição |
+   |---|---|
+   | `SERVER_NAME` | Domínio/host pelo qual a plataforma será acessada |
+   | `SYSTEM_ADMIN_PASSWORD` | Senha do usuário administrador (se vazia, uma senha é gerada automaticamente e salva em `videos/.initial_admin_password`) |
+   | `DB_MYSQL_PASSWORD` | Senha do banco de dados |
+   | `WEBSITE_TITLE` | Nome exibido no site |
+   | `CONTACT_EMAIL` | E-mail de contato/administração |
 
-🐳 **Docker Installation**
-- For a Docker-based setup, follow our [Docker Installation Guide](https://github.com/WWBN/AVideo/wiki/Running-AVideo-with-Docker) to streamline your experience.
+4. **Suba os containers**
 
-These tutorials cover the entire scope of downloading, installing AVideo, and setting up required dependencies. By following them, you can efficiently prepare your Ubuntu system for AVideo.
+   ```bash
+   docker compose up -d --build
+   ```
 
-# 📘 Usage
+   Isso inicia os serviços definidos em `docker-compose.yml`:
+   - `avideo` — aplicação principal (Streamer)
+   - `live` — servidor de transmissão ao vivo (RTMP/HLS)
+   - `database` — MariaDB da aplicação
+   - `database_encoder` — MariaDB da fila de encoding
+   - `memcached` — cache de sessão/objetos
 
-For comprehensive administrative guidance, refer to the [Admin Manual](https://github.com/WWBN/AVideo/wiki/Admin-manual). This resource provides detailed instructions on how to manage and optimize your AVideo platform effectively.
+5. **(Opcional) Suba o phpMyAdmin**
 
-# 🛠️ Errors and Troubleshooting
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose-phpmyadmin.yml up -d
+   ```
 
-Encountered an issue? Don't worry! Our [error identification guide](https://github.com/WWBN/AVideo/wiki/How-to-find-errors-on-AVideo-Platform) is designed to help you troubleshoot and resolve common problems efficiently.
+6. **Acesse a plataforma**
 
-## 🌟 AVideo Platform Certified Support
+   - Aplicação: `http://localhost` (ou `https://localhost` se TLS estiver habilitado)
+   - Ingestão de live via RTMP: `rtmp://localhost:1935`
+   - phpMyAdmin (se habilitado): `http://localhost:8081`
+   - Login inicial: usuário `admin` e a senha definida em `SYSTEM_ADMIN_PASSWORD`
 
-Require specialized assistance? Our team of certified AVideo Platform developers is here to help. For professional support and expert consulting on installation, consulting, or plugins, reach out to [Daniel Neto](https://streamphp.com/marketplace/). We're committed to ensuring a seamless and effective AVideo installation and setup.
+7. **Acompanhar logs / parar os containers**
+
+   ```bash
+   docker compose logs -f avideo
+   docker compose down
+   ```
+
+> 💡 O `docker-compose.yml` já define `healthcheck` para os serviços `avideo`, `live`, `database` e `database_encoder`, além de limites de CPU/memória configuráveis via `CPUS_LIMIT` e `MEMORY_LIMIT` no `.env`.
+
+## Requisitos para instalação manual
+
+Para instalação diretamente em um servidor Linux (sem Docker), o AVideo requer:
+
+- **PHP** 8.0 ou superior
+- **MySQL/MariaDB** 5.0 ou superior
+- **Apache** 2.x com módulo `mod_rewrite` habilitado
+- Ubuntu **sem** painéis de controle (cPanel, Plesk, Webmin, VestaCP), pois eles restringem a instalação de bibliotecas e a compilação de componentes essenciais como o Nginx com módulo RTMP
+
+Guias detalhados por versão do Ubuntu estão disponíveis na [wiki oficial do projeto](https://github.com/WWBN/AVideo/wiki).
+
+## Suporte e documentação
+
+- Manual do administrador: [wiki do AVideo](https://github.com/WWBN/AVideo/wiki/Admin-manual)
+- Guia de erros e troubleshooting: [wiki do AVideo](https://github.com/WWBN/AVideo/wiki/How-to-find-errors-on-AVideo-Platform)
+- Site oficial: [streamphp.com](https://streamphp.com/)
+
+## Licença
+
+Distribuído sob a licença JSON (baseada na licença MIT, com a cláusula adicional de que o software deve ser usado "para o Bem, não para o Mal"). Veja o arquivo [`LICENSE`](./LICENSE) para o texto completo.
