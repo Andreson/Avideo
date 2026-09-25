@@ -1,0 +1,821 @@
+
+.gallery .title,
+.videosDetails .title {
+    font-size: 1.1em;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-height: 1em; /* fallback */
+    max-height: 32px; /* fallback */
+    min-height: 32px; /* fallback */
+    -webkit-line-clamp: 2; /* number of lines to show */
+    -webkit-box-orient: vertical;
+}
+.gallery .watch-view-count {
+    font-size: 0.8em;
+    font-weight: normal;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+.galleryVideo  {
+    padding-bottom: 10px;
+}
+
+.galleryVideo .group {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mainArea{
+    padding: 15px;
+}
+
+h3.galleryTitle{
+    padding: 15px 5px;
+}
+
+.aspectRatio16_9 {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+    overflow: hidden;
+}
+
+.aspectRatio16_9 img{
+    text-indent:-9999px;
+    width: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.aspectRatio16_9 .thumbsImage img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+.thumbsGIF{
+    text-indent:-9999px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.firstRow{
+    margin-bottom: 10px;
+    padding-bottom: 25px;
+    border-bottom: solid 1px #EEE;
+}
+
+.galeryDetails{
+    font-size: smaller;
+}
+
+.galeryDetails div{
+    float: left;
+    padding-right: 5px;
+    margin: 2px 0;
+}
+
+.galeryDetails .photo_identification{
+    display: inline-flex;
+    width: 100%;
+}
+
+.galeryDetails .photo_identification img{
+    max-width: 20px;
+    margin-right: 5px;
+}
+
+.galeryDetails .photo_identification .liveUser{
+    overflow: hidden;
+    white-space: nowrap; /* Prevents the text from wrapping to the next line */
+    text-overflow: ellipsis; /* Adds the ellipsis when the text overflows */
+    max-width: 100%; /* Set a width to trigger the ellipsis when content exceeds it */
+}
+
+.firstRow .galeryDetails div{
+    font-size: 1em;
+}
+
+.galeryDetails div.userName{
+    width: 100%;
+}
+
+#videoButtonOptions,
+.videoButtonOptions{
+    padding: 10px;
+    white-space: nowrap;
+}
+
+#videoButtonOptions .btn-link,
+.videoButtonOptions .btn-link{
+    padding: 1px 0;
+}
+
+#videoButtonOptions div,
+.videoButtonOptions div{
+    float: none;
+}
+
+#videoButtonOptions .btn,
+.videoButtonOptions .btn {
+    font-size: unset;
+}
+
+.galleryVideo > .galeryDetails{
+    width: calc(100% - 20px);
+    float: left;
+}
+
+.fixPadding{
+    padding: 0 5px;
+}
+
+.popover-content, .popover-content>div{
+    white-space: normal !important;
+    width: auto;
+    color: inherit !important;
+}
+.popover-content>div{
+    overflow-y: auto;
+    height: 140px;
+}
+
+.mainAreaDescription{
+    position:relative;
+    height:100%;
+    width: 110%;
+    padding-right: 10%;
+    overflow-x:hidden;
+    overflow-y:scroll; 
+    max-height: 17vw;
+}
+.mainAreaDescriptionContainer{
+    position: relative;
+    overflow: hidden;
+}
+a.h6{
+    text-decoration: none !important;
+}
+
+a.h6.galleryLink > strong{
+    margin-top: 8px;
+}
+
+.popover-title { 
+    color: black;
+    font-size: 1em;
+} 
+
+.popover-content{
+    color: black !important; 
+    font-size: 0.8em;
+}
+
+.gallery .label{
+    border-radius: 0;
+}
+.gallery .label:first-child{
+    border-top-left-radius: 0.25em;
+    border-bottom-left-radius: 0.25em;
+}
+.gallery .label:last-child{
+    border-top-right-radius: 0.25em;
+    border-bottom-right-radius: 0.25em;
+}
+
+.galleryTitle a.btn-default:hover{
+    background-color: transparent;
+}
+
+.galeryRowElement .galleryVideo {
+    margin-bottom: 10px; 
+}
+
+.galleryVideoButtons{
+    position: absolute; 
+    right: 5px; 
+    top: 5px; 
+    z-index: 1025;
+    display: none;
+    
+}
+.galleryVideoButtons button{
+    opacity: 0.7;
+    display: inline-grid;
+    padding: 5px 1px;
+    justify-content: center;
+    margin: 1px 0;
+    width: 25px;
+    height: 25px;
+} 
+
+.galleryVideoButtons div.dropdown.text-center.open > ul button {
+    display: inline-block;
+    width: auto;
+    height: auto;
+    margin: auto;
+    padding: 5px 10px;
+}
+.galleryVideo:hover  .galleryVideoButtons,
+.thumbsImageContainer:hover  .galleryVideoButtons,
+.galleryVideo:active  .galleryVideoButtons,
+.thumbsImageContainer:active  .galleryVideoButtons,
+.galleryVideo:focus  .galleryVideoButtons,
+.thumbsImageContainer:focus  .galleryVideoButtons {
+    display: block !important;
+} 
+.galleryVideoButtons button:hover,
+.galleryVideoButtons button:active,
+.galleryVideoButtons button:focus{
+    opacity: 1;
+}
+.galleryVideoButtons  div.dropdown .dropdown-menu{
+    margin: -20px auto auto -160px;
+}
+.galleryVideo div.galleryVideoButtons > div > ul > li > button{
+    opacity: 1;
+    display: inline-block;
+    width: 100%;
+}
+
+.gallerySerieOverlay{
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    z-index: 1020;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0);
+    color: rgba(0,0,0,0);
+    -webkit-box-align:center;
+    -webkit-box-pack:center;
+    display:-webkit-box;
+    font-weight: bold;
+}
+.gallerySerieOverlay:hover{
+    background-color: rgba(0,0,0,0.5);
+    color: #FFF;
+}
+.gallerySerieOverlayTotal{
+    position: absolute; 
+    right: 0; 
+    top: 0; 
+    width: 25%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    color: #FFF;
+    -webkit-box-align:center;
+    -webkit-box-pack:center;
+    display:-webkit-box;
+    font-weight: bold;
+}
+
+
+.galleryTags .label{
+   display: table-cell;
+   font-size: 0.9em;
+}
+
+.isChannelToGallery .addChannelToGallery, .removeChannelFromGallery{
+    display: none;
+}
+
+.isChannelToGallery .removeChannelFromGallery {
+    display: inline-block;
+}
+.galleryTags{
+    margin: 0 4px 0 0;
+    display: inline-flex;
+ }
+.videoChannel {
+    display: flex;
+    align-items: center;
+}
+.videoChannel a {
+    display: flex;
+    align-items: center;
+}
+
+.videoChannel a img{
+    width: 20px; 
+    margin: 2px 5px 2px 0;
+}
+.videoChannel a i{
+    margin-left: 2px;
+}
+.channelPhoto{
+    width: 35px;
+    margin-right:10px;
+}
+.channelPhotoDescription{
+    width: calc(100% - 65px);
+    overflow: hidden;
+}
+
+.notShowChannel .channelPhotoDescription{
+    width: calc(100% - 25px);
+}
+
+.channelPhoto {
+    filter: grayscale(50%);
+    opacity: 0.7; 
+    transition: filter 0.3s, opacity 0.3s; 
+}
+
+.galleryVideo:hover .channelPhoto {
+    filter: grayscale(0%);
+    opacity: 1; 
+}
+
+.videoHumanTime{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.8em;
+    display: inline-block;
+}
+.galeryDetailsContent{
+    margin: 5px 0 15px 0;
+}
+
+.galleryDownload {
+    position: relative;
+    overflow: visible;
+    z-index: 3;
+    display: inline-flex;
+    width: 100%;
+}
+
+.galleryDownloadIcon,
+.galleryDownloadQuality {
+    display: none;
+}
+
+/* Gallery page only: retain Bootstrap 3 column widths and theme colors. */
+.galleryLayout .galleryGrid {
+    clear: both;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.galleryLayout .galleryGrid::before,
+.galleryLayout .galleryGrid::after,
+.galleryLayout .galleryGrid > .clearfix {
+    display: none;
+}
+
+.galleryLayout .galleryGrid > .galleryVideo {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-width: 0;
+    margin-bottom: 20px;
+    padding: 0 8px 12px;
+}
+
+.galleryLayout .galleryVideo .aspectRatio16_9 {
+    border-radius: 12px;
+}
+
+.galleryLayout .galleryVideo .title {
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1.35;
+    min-height: 2.7em;
+    max-height: 2.7em;
+    margin: 10px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.galleryLayout .galleryVideo .galeryDetailsContent {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    /* Reserve the action row even when this video has no download button. */
+    grid-template-rows: 1fr minmax(40px, auto);
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    margin: 10px 0 0;
+}
+
+.galleryLayout .galeryDetailsContent::before,
+.galleryLayout .galeryDetailsContent::after,
+.galleryLayout .galeryDetailsContent > .clearfix {
+    display: none;
+}
+
+.galleryLayout .galeryDetailsContent > a {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.galleryLayout .galeryDetailsContent > .dropdown {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+}
+
+.galleryLayout .galeryDetailsContent > .channelPhotoDescription {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    min-width: 0;
+    overflow: visible;
+}
+
+.galleryLayout .galeryDetailsContent > .dropup {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    align-self: end;
+}
+
+.galleryLayout .galleryDownload > .btn,
+.galleryLayout .videoTrailerBtnLabel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: auto;
+    max-width: 100%;
+    min-height: 36px;
+    padding: 8px 14px;
+    border-radius: 18px;
+    background-image: none;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 18px;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.galleryLayout .videoTrailerBtnLabel {
+    align-self: flex-start;
+    margin: 6px 0;
+}
+
+.galleryLayout .galleryDownloadLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.galleryLayout .galleryDownload > .btn > .fa,
+.galleryLayout .galleryDownload > .btn > .caret,
+.galleryLayout .videoTrailerBtnLabel > .fa {
+    flex-shrink: 0;
+}
+
+.galleryLayout .galleryDownload > .btn:focus-visible,
+.galleryLayout .videoTrailerBtnLabel:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+.galleryLayout .galleryDownload > .dropdown-menu {
+    min-width: 0;
+    width: 100%;
+    max-height: 240px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+    padding: 6px;
+    border-radius: 12px;
+}
+
+.galleryLayout .galleryDownload > .dropdown-menu > li > a {
+    display: flex;
+    flex-direction: row;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px;
+    border-radius: 7px;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.galleryLayout .galleryDownload.open > .dropdown-menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 96px), 1fr));
+    gap: 4px;
+}
+
+.galleryLayout .galleryDownloadIcon {
+    display: inline-block;
+    font-size: 20px;
+}
+
+.galleryLayout .galleryDownload .galleryDownloadQuality {
+    display: inline-block;
+    flex-shrink: 0;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.galleryLayout .galleryDownloadOptionLabel {
+    display: none;
+}
+
+.galleryLayout .galleryVideo .channelPhoto {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin: 0;
+    filter: none;
+    opacity: 1;
+}
+
+.galleryLayout .channelPhotoDescription > .videoChannel {
+    order: -1;
+    min-width: 0;
+    min-height: 1.5em;
+    line-height: 1.5;
+}
+
+.galleryLayout .videoChannel a {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.galleryLayout .channelPhotoDescription > .galeryDetails {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+    min-height: 1.8em;
+    line-height: 1.5;
+}
+
+.galleryLayout .galleryVideo .galleryTags {
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 2px;
+}
+
+.galleryLayout .galleryVideo .galleryTags .label {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    border-radius: 4px;
+}
+
+.galleryLayout .channelPhotoDescription > .videoHumanTime {
+    margin-top: auto;
+    padding-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+
+.galleryLayout .galeryDetailsContent > .dropdown > .dropdown-menu {
+    left: auto;
+    right: 0;
+}
+
+.galleryLayout .galeryDetailsContent > .dropdown > .dropdown-toggle {
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 50%;
+}
+
+.galleryLayout .galleryVideo:focus-within .galleryVideoButtons {
+    display: block;
+}
+
+.galleryLayout h3.galleryTitle {
+    margin: 12px 0 16px;
+    padding: 12px 8px;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.galleryLayout .galleryTitle a {
+    white-space: normal;
+}
+
+@media (max-width: 767px) {
+    .galleryLayout #BigVideoLive:not(.fullscreen) #BigVideoLiveIFrame {
+        height: auto;
+        min-height: 0;
+        max-height: 240px;
+        aspect-ratio: 16 / 9;
+    }
+    .galleryLayout .galleryVideo .title {
+        max-height: none;
+        -webkit-line-clamp: unset;
+    }
+    .galleryLayout .galleryVideo .galeryDetailsContent {
+        grid-template-rows: auto auto;
+    }
+    .galleryLayout .mainArea {
+        padding: 5px;
+    }
+
+    .galleryLayout .galleryGrid > .galleryVideo {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+}
+
+.galleryLayout .galleryVideo .title:hover,
+.galleryLayout .galleryVideo:focus-within .title {
+    max-height: none;
+    -webkit-line-clamp: unset;
+}
+
+/* Featured videos: scoped to Gallery, including its channel embed. */
+.gallery-featured-wrap {
+    margin: 12px 0 24px;
+}
+#bigVideoCarousel.gallery-featured {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(12px, 2vw, 24px);
+    border: 1px solid rgba(128, 128, 128, .2);
+    border-radius: 18px;
+    background: linear-gradient(125deg, rgba(128, 128, 128, .08), transparent 65%);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .06);
+}
+#bigVideoCarousel .gallery-featured-layout {
+    display: flex;
+    align-items: center;
+    margin: 0 -12px;
+}
+#bigVideoCarousel .gallery-featured-layout::before,
+#bigVideoCarousel .gallery-featured-layout::after {
+    display: none;
+}
+#bigVideoCarousel .gallery-featured-media,
+#bigVideoCarousel .gallery-featured-body {
+    min-width: 0;
+    padding: 0 12px;
+}
+#bigVideoCarousel .gallery-featured-media .aspectRatio16_9 {
+    border-radius: 12px;
+    background: #111;
+}
+#bigVideoCarousel .gallery-featured-title {
+    margin: 0 0 14px;
+    padding: 0;
+    font-size: clamp(21px, 2.2vw, 32px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.025em;
+    overflow-wrap: anywhere;
+}
+#bigVideoCarousel .descriptionArea {
+    margin-bottom: 16px;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+#bigVideoCarousel .galeryDetails {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    font-size: 12px;
+}
+#bigVideoCarousel .galeryDetails > div {
+    float: none;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+}
+#bigVideoCarousel .galleryTags {
+    flex-basis: 100%;
+}
+#bigVideoCarousel .galleryTags .label {
+    display: inline-block;
+    padding: 6px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+#bigVideoCarousel .galeryDetails > .btn-link,
+#bigVideoCarousel .galeryDetails > .btn {
+    min-height: 32px;
+    border-radius: 6px;
+}
+#bigVideoCarousel .gallery-featured-navigation {
+    order: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(128, 128, 128, .18);
+}
+#bigVideoCarousel .gallery-featured-arrow {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+#bigVideoCarousel .gallery-featured-arrow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .14);
+}
+#bigVideoCarousel .carousel-indicators {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    margin: 0;
+    padding: 0;
+}
+#bigVideoCarousel .carousel-indicators li,
+#bigVideoCarousel .carousel-indicators li.active {
+    display: block;
+    width: 28px;
+    height: 32px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    text-indent: 0;
+}
+#bigVideoCarousel .carousel-indicators button {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+}
+#bigVideoCarousel .carousel-indicators button::after {
+    content: '';
+    display: block;
+    width: 7px;
+    height: 7px;
+    margin: auto;
+    border-radius: 8px;
+    background: currentColor;
+    opacity: .3;
+    transition: width .25s ease, opacity .25s ease;
+}
+#bigVideoCarousel .carousel-indicators .active button::after {
+    width: 22px;
+    opacity: .85;
+}
+#bigVideoCarousel button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+/* Bootstrap clips dropdowns even when the carousel is stationary. */
+#bigVideoCarousel .carousel-inner:has(.item.active .open) {
+    overflow: visible;
+}
+@media (max-width: 767px) {
+    #bigVideoCarousel .gallery-featured-layout {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 18px;
+    }
+    #bigVideoCarousel .gallery-featured-media,
+    #bigVideoCarousel .gallery-featured-body {
+        width: 100%;
+    }
+    #bigVideoCarousel .gallery-featured-title {
+        font-size: 22px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    #bigVideoCarousel .item,
+    #bigVideoCarousel .gallery-featured-arrow,
+    #bigVideoCarousel .carousel-indicators button::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}

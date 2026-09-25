@@ -1,0 +1,399 @@
+/* Catalog styles stay inside the Flix views; the active Bootstrap theme supplies colors. */
+.flickity-area {
+    --flix-gutter: clamp(16px, 3.5vw, 64px);
+    --flix-card-width: clamp(176px, 18vw, 288px);
+    --flix-poster-width: clamp(128px, 12vw, 184px);
+    --flix-radius: 6px;
+    --flix-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+    color: var(--flix-text, inherit);
+}
+.flix-catalog { position: relative; min-width: 0; overflow: hidden; }
+#mainContainer.flickity-area {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    padding-bottom: 32px;
+}
+#carouselRows {
+    position: relative;
+    padding: 8px var(--flix-gutter) 40px;
+    background: var(--flix-surface);
+}
+#carouselRows > .row,
+#carouselRows .topicRow {
+    margin-left: 0;
+    margin-right: 0;
+}
+#carouselRows h2 {
+    position: relative;
+    margin: 24px 0 12px;
+    font-size: clamp(20px, 1.6vw, 28px);
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+#carouselRows h2 a {
+    color: inherit;
+}
+.flix-carousel {
+    margin-bottom: 36px;
+}
+.flix-carousel:not(.flickity-enabled) {
+    display: flex;
+    overflow: hidden;
+}
+.flix-carousel .flickity-viewport {
+    margin: 0;
+    padding: 0;
+    /* Override Flickity's clipping only within the catalog's clipped outer container. */
+    overflow: visible;
+}
+.flix-carousel .carousel-cell {
+    width: var(--flix-card-width);
+    height: auto;
+    margin-right: 12px;
+}
+.flix-carousel.rowPortrait .carousel-cell {
+    width: var(--flix-poster-width);
+}
+.flix-carousel .tile {
+    position: relative;
+    width: 100%;
+    font-size: 14px;
+}
+.flix-carousel .thumbsImage {
+    position: relative;
+    cursor: pointer;
+    border-radius: var(--flix-radius);
+    transition: box-shadow .2s ease, transform .2s ease;
+}
+.flix-carousel .thumbsImage.active,
+.flix-carousel .thumbsImage:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+.flix-carousel .tile__media {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--flix-radius);
+    background: var(--flix-surface);
+}
+.flix-carousel .tile__img,
+.flix-carousel .thumbsGIF {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+.flix-carousel.rowPortrait .tile__img,
+.flix-carousel.rowPortrait .thumbsGIF {
+    aspect-ratio: 2 / 3;
+}
+/* A missing portrait falls back to the complete landscape artwork, without stretching. */
+.flix-carousel.rowPortrait .tile__img:not(.posterPortrait),
+.flix-carousel.rowPortrait .tile__media:has(.tile__img:not(.posterPortrait)) .thumbsGIF {
+    object-fit: contain;
+}
+.flix-carousel .tile__img.flix-image-fallback { object-fit: contain; }
+.flix-carousel .thumbsGIF {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+.flix-carousel .tile__media h4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    height: 2.8em;
+    margin: 8px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: inherit;
+}
+.flix-carousel .tile__media h4 a {
+    color: inherit;
+}
+.flix-carousel.title-over-poster .tile__media h4 {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    height: auto;
+    max-height: 4.8em;
+    margin: 0;
+    padding: 24px 10px 8px;
+    color: var(--flix-text);
+    background: linear-gradient(to top, var(--flix-surface) 45%, transparent);
+}
+.flix-carousel .progress {
+    border-radius: 0;
+    box-shadow: none;
+}
+.flix-carousel .progress:has(.progress-bar[aria-valuenow="0"]) {
+    visibility: hidden;
+}
+.flix-carousel .carousel-cell-image {
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+.flix-carousel .flickity-lazyloaded,
+.flix-carousel .flickity-lazyerror {
+    opacity: 1;
+}
+.flix-carousel .flickity-prev-next-button {
+    width: 36px;
+    height: 64px;
+    border-radius: var(--flix-radius);
+    color: var(--flix-text);
+    background: var(--flix-surface);
+    box-shadow: var(--flix-shadow);
+    z-index: 2;
+}
+.flix-carousel .flickity-prev-next-button.previous { left: -14px; }
+.flix-carousel .flickity-prev-next-button.next { right: -14px; }
+.flix-carousel .flickity-prev-next-button:disabled { visibility: hidden; }
+.flix-carousel .flickity-page-dots {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 4px;
+    bottom: -20px;
+    padding: 0;
+}
+/* Flickity 3 uses buttons; older bundled versions use .dot elements. */
+.flix-carousel .flickity-page-dot,
+.flix-carousel .flickity-page-dots .dot {
+    flex: 0 1 16px;
+    min-width: 0;
+    width: 16px;
+    height: 3px;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    background: currentColor;
+    opacity: .25;
+}
+.flix-carousel .flickity-page-dot.is-selected,
+.flix-carousel .flickity-page-dots .dot.is-selected { opacity: 1; }
+.flix-carousel .flickity-page-dots:has(> :only-child) { display: none; }
+.flix-carousel .arrow-down { display: none; }
+.flix-hero {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    min-height: clamp(380px, 38vw, 640px);
+    background-size: cover;
+    background-position: center;
+}
+.flix-hero .posterDetails {
+    position: relative;
+    min-height: inherit;
+    padding: clamp(32px, 5vw, 80px) var(--flix-gutter) 48px;
+    background: linear-gradient(to right, var(--flix-surface) 45%, transparent);
+    background: linear-gradient(to top, var(--flix-surface), transparent 30%),
+        linear-gradient(to right, var(--flix-surface) 5%, color-mix(in srgb, var(--flix-surface) 92%, transparent) 40%, transparent 100%);
+}
+.flix-hero .infoTitle {
+    max-width: 24ch;
+    margin: 0 0 20px;
+    font-size: clamp(28px, 3vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+.flickity-area .infoDetails {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+}
+.flickity-area .infoDetails .label {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.4;
+}
+.flickity-area .posterDetails .row { margin-top: 20px; }
+.flix-hero .flix-poster-preview { max-width: 220px; }
+.flix-hero .flix-poster-preview img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    object-position: left center;
+    border-radius: var(--flix-radius);
+}
+.flix-hero .flix-poster-preview .thumbsImage { position: relative; }
+.flix-hero .flix-poster-preview .thumbsGIF { width: 100%; height: 100%; object-fit: contain; }
+.flickity-area .mainInfoText {
+    width: 100%;
+    max-height: 10em;
+    margin-top: 0;
+    overflow: auto;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.flickity-area .posterDetails .btn {
+    margin: 4px 4px 4px 0;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+#carouselRows .poster {
+    position: relative;
+    height: auto;
+    margin: 16px 0 32px;
+    background-position: center;
+    background-size: cover;
+    border-radius: var(--flix-radius);
+    overflow: hidden;
+}
+#carouselRows .posterDetails {
+    position: relative;
+    min-height: 340px;
+    padding: 28px;
+    background: linear-gradient(to right, var(--flix-surface) 55%, transparent);
+    background: linear-gradient(to right, var(--flix-surface) 20%, color-mix(in srgb, var(--flix-surface) 92%, transparent) 55%, color-mix(in srgb, var(--flix-surface) 30%, transparent));
+}
+#carouselRows .posterDetails::after { content: ''; display: table; clear: both; }
+#carouselRows .posterDetails > .infoTitle,
+#carouselRows .posterDetails > .topicRow > .infoTitle { padding-right: 50px; margin-top: 0; }
+.flickity-area .posterDetails .posterPortrait { max-height: 260px; object-fit: contain; }
+.flickity-area .posterDetails .flix-close-details {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    padding: 10px 14px;
+}
+.flickity-area .footerBtn { margin-top: 20px; }
+.flickity-area .topicRow { margin-top: 28px; }
+.flickity-area .paidOnlyLabel {
+    position: absolute;
+    top: 10px;
+    right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+#bg_container,
+#bg_container_overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1;
+}
+.flix-hero #bg_container iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--flix-video-width, 100%);
+    height: var(--flix-video-height, 100%);
+    min-width: 100%;
+    min-height: 100%;
+    transform: translate(-50%, -50%);
+    border: 0;
+}
+#divIframeFull iframe {
+    width: 100%;
+    height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    border: 0;
+}
+.flix-preview-status {
+    display: none;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--flix-surface);
+    color: var(--flix-text);
+    font-size: 12px;
+    pointer-events: none;
+}
+.thumbsImage[aria-busy="true"]:hover > .flix-preview-status { display: block; }
+/* Keep catalog loading inside its panel, using the shared loading helper. */
+.flickity-area .avideo-inline-loading {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    padding: 20px 0;
+    border: 0;
+    background: transparent;
+    color: var(--flix-text, inherit);
+    pointer-events: none;
+}
+.flickity-area .avideo-inline-loading-row {
+    min-width: 0;
+    margin: 0;
+}
+.flickity-area .avideo-inline-loading-line {
+    background: currentColor;
+    background: linear-gradient(100deg, color-mix(in srgb, currentColor 7%, transparent) 25%,
+        color-mix(in srgb, currentColor 16%, transparent) 45%, color-mix(in srgb, currentColor 7%, transparent) 65%);
+    background-size: 400% 100%;
+    border-radius: var(--flix-radius);
+    animation-duration: 1.8s;
+}
+.flickity-area .avideo-inline-loading-line-title {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    margin: 0 0 14px;
+}
+.flickity-area .avideo-inline-loading-line-subtitle { width: 72%; }
+.flickity-area .avideo-inline-loading-line-content { width: 46%; }
+.flickity-area .avideo-inline-loading-text {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: inherit;
+    opacity: .75;
+    text-align: left;
+    font-size: 13px;
+    letter-spacing: .02em;
+}
+body.fullscreen { margin: 0; padding: 0; overflow: hidden; }
+.isChannelToYouPHPFlix2 .addChannelToYouPHPFlix2,
+.removeChannelFromYouPHPFlix2 { display: none; }
+.isChannelToYouPHPFlix2 .removeChannelFromYouPHPFlix2 { display: inline-block; }
+@media (hover: hover) and (pointer: fine) {
+    .flix-carousel .thumbsImage:hover { transform: translateY(-4px); box-shadow: var(--flix-shadow); }
+}
+@media (max-width: 767px) {
+    .flickity-area .avideo-inline-loading { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .flickity-area .avideo-inline-loading-row:nth-child(n + 3) { display: none; }
+    .flix-hero { min-height: 360px; }
+    .flix-hero .posterDetails {
+        padding-top: 100px;
+        padding-bottom: 32px;
+        background: linear-gradient(to top, var(--flix-surface) 55%, transparent);
+        background: linear-gradient(to top, var(--flix-surface) 5%, color-mix(in srgb, var(--flix-surface) 90%, transparent) 55%, transparent);
+    }
+    .flix-hero .infoTitle { font-size: 30px; }
+    #carouselRows .posterDetails { min-height: 0; padding: 24px 16px; }
+    #carouselRows .posterDetails .infoText { width: 100%; }
+    .flickity-area .posterDetails .btn { padding: 10px 14px; }
+    .flix-carousel .flickity-prev-next-button { width: 28px; height: 44px; }
+    .flix-carousel .flickity-prev-next-button.previous { left: -12px; }
+    .flix-carousel .flickity-prev-next-button.next { right: -12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .flickity-area .avideo-inline-loading-line { animation: none; }
+    .flix-carousel .thumbsImage,
+    .flix-carousel .carousel-cell-image { transition: none; }
+    .flix-carousel .thumbsImage:hover { transform: none; }
+}

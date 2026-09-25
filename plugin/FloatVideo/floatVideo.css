@@ -1,0 +1,29 @@
+
+body.floatVideo #videoContainer{
+    position: fixed;
+    bottom: 50px;
+    left: 5px;
+    width: 20vw;
+    height: auto;
+    z-index: 9999;
+}
+body.floatVideo #floatButtons{
+    display: block !important;
+}
+body.floatVideo #floatButtonsClose{
+    position: absolute;
+    right: -15px;
+    top: -15px;
+}
+@media (max-width: 991px) {
+    body.floatVideo #floatButtons{
+        display: none !important;
+    }
+    body.floatVideo #videoContainer{
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100vw;
+        height: 30vh;
+    }
+}

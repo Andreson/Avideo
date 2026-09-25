@@ -1,0 +1,195 @@
+<?php
+// This endpoint receives encoder-produced file chunks and writes them to the temp dir.
+// It is a critical write primitive, so it must be authenticated. Two auth methods are
+// accepted, both presented by the encoder as HTTP headers (never query strings, so they
+// do not leak into access logs):
+//
+//   1. X-Encoder-Upload-Token  — issued by the site with getToken(ttl, 'EncoderChunkUpload')
+//      when the video is queued (see Video::queue()). Validated here with verifyToken(),
+//      which needs only $global['salt']/saltV2 and functions.php — NO database connection.
+//      This is the common path (site-dispatched uploads) and keeps every chunk PUT off the DB.
+//
+//   2. X-Encoder-User / X-Encoder-Pass — the streamer credentials the encoder already uses
+//      for sendToStreamer. Used as a universal fallback for jobs that carry no token (direct
+//      encoder upload, link import). Validated with useVideoHashOrLogin() + User::canUpload(),
+//      the same mechanism aVideoEncoder.json.php uses, which does require the full stack.
+//
+// When a token is present we load config WITHOUT the database (fast path). Only when a token
+// is absent do we load the full stack for the credential fallback.
+global $global, $doNotConnectDatabaseIncludeConfig, $doNotStartSessionIncludeConfig;
+
+// This protocol uses a hexadecimal upload ID. The general request sanitizer casts
+// fields ending in _id to integers, so preserve it for the strict validation below.
+$encoderChunkFileId = isset($_GET['file_id']) ? $_GET['file_id'] : '';
+
+$uploadToken = isset($_SERVER['HTTP_X_ENCODER_UPLOAD_TOKEN']) ? $_SERVER['HTTP_X_ENCODER_UPLOAD_TOKEN'] : '';
+
+if (!empty($uploadToken)) {
+    // Token fast path: no DB, no session, no plugins needed to verify it.
+    $doNotConnectDatabaseIncludeConfig = 1;
+    $doNotStartSessionIncludeConfig = 1;
+}
+if (!isset($global['systemRootPath'])) {
+    require_once '../videos/configuration.php';
+}
+
+$authorized = false;
+if (!empty($uploadToken)) {
+    // Cryptographic token check — no database access.
+    $authorized = verifyToken($uploadToken, 'EncoderChunkUpload');
+} else {
+    // Fallback: authenticate with the streamer credentials (full stack already loaded).
+    if (!empty($_SERVER['HTTP_X_ENCODER_USER'])) {
+        $_REQUEST['user'] = $_SERVER['HTTP_X_ENCODER_USER'];
+        $_REQUEST['pass'] = isset($_SERVER['HTTP_X_ENCODER_PASS']) ? $_SERVER['HTTP_X_ENCODER_PASS'] : '';
+        $_REQUEST['encodedPass'] = 1;
+    }
+    if (function_exists('useVideoHashOrLogin')) {
+        useVideoHashOrLogin();
+    }
+    $authorized = class_exists('User') && User::canUpload();
+}
+
+if (!$authorized) {
+    http_response_code(403);
+    error_log('aVideoEncoderChunk.json.php: rejected unauthorized chunk request from ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    die(json_encode(['error' => true, 'msg' => 'Forbidden']));
+}
+
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+
+// Security: clean up orphaned chunk files older than 4 hours.
+// 4 hours instead of 1 hour because a multi-chunk upload of a large file
+// (e.g. 12 GB) can legitimately span several hours on a slow link.
+$tmpDir = sys_get_temp_dir();
+foreach (glob($tmpDir . DIRECTORY_SEPARATOR . 'YTPChunk_*') as $staleFile) {
+    if (is_file($staleFile) && filemtime($staleFile) < time() - 14400) {
+        @unlink($staleFile);
+    }
+}
+
+// Security: enforce a per-request size cap (mirrors PHP's post_max_size; falls back to 4 GB).
+// For multi-chunk uploads each request is at most 500 MB, so this limit applies per chunk.
+function _parseIniSize(string $val): int
+{
+    $val  = trim($val);
+    $last = strtolower($val[strlen($val) - 1]);
+    $num  = (int) $val;
+    switch ($last) {
+        case 'g': $num *= 1024;
+        // fall through
+        case 'm': $num *= 1024;
+        // fall through
+        case 'k': $num *= 1024;
+    }
+    return $num;
+}
+$rawLimit  = ini_get('post_max_size');
+$floorBytes = 4 * 1024 * 1024 * 1024; // 4 GB floor
+$maxBytes  = $rawLimit ? max(_parseIniSize($rawLimit), $floorBytes) : $floorBytes;
+
+// Security: absolute cap on the ASSEMBLED file size (sum of every chunk). This bounds how
+// much an authorised encoder can write to the temp dir per upload. The default (32 GB) is
+// generous enough for a long high-resolution (4K) video; override with
+// $global['encoderChunkMaxTotalBytes'] if you need larger.
+$maxTotalBytes = !empty($global['encoderChunkMaxTotalBytes'])
+    ? (int) $global['encoderChunkMaxTotalBytes']
+    : 32 * 1024 * 1024 * 1024; // 32 GB
+
+// Reject obviously oversized requests using the Content-Length hint.
+$contentLength = isset($_SERVER['CONTENT_LENGTH']) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
+if ($contentLength > $maxBytes) {
+    http_response_code(413);
+    error_log("aVideoEncoderChunk.json.php: rejected oversized request ({$contentLength} bytes)");
+    die(json_encode(['error' => true, 'msg' => 'Payload too large']));
+}
+
+// -----------------------------------------------------------------------
+// Multi-chunk assembly mode
+//
+// The encoder splits large files into 500 MB PUT requests and passes:
+//   ?file_id=<16 hex chars>   — unique per upload session
+//   &chunk=<0-based index>    — which piece this is
+//   &total=<total pieces>     — how many pieces in total
+//
+// The actual idempotent/crash-safe commit logic lives in EncoderChunkAssembler so it can
+// be unit-tested directly (see tests/Unit/EncoderChunkAssemblerTest.php) without an HTTP
+// round-trip; this endpoint only translates its result into an HTTP response.
+// -----------------------------------------------------------------------
+require_once __DIR__ . '/EncoderChunkAssembler.php';
+
+$fileId = $encoderChunkFileId;
+if ($fileId !== '') {
+    // Validate file_id to prevent path traversal (only hex chars allowed).
+    if (!is_string($fileId) || !preg_match('/^[0-9a-f]{1,64}$/i', $fileId)) {
+        http_response_code(400);
+        error_log("aVideoEncoderChunk.json.php: invalid file_id rejected");
+        die(json_encode(['error' => true, 'msg' => 'Invalid file_id']));
+    }
+
+    $chunkIndex  = isset($_GET['chunk']) ? (int) $_GET['chunk'] : 0;
+    $totalChunks = isset($_GET['total']) ? max(1, (int) $_GET['total']) : 1;
+
+    $putdata = fopen('php://input', 'r');
+    $result = EncoderChunkAssembler::commitChunk($tmpDir, $fileId, $chunkIndex, $totalChunks, $putdata, $contentLength, $maxBytes, $maxTotalBytes);
+    fclose($putdata);
+
+    if ($result->status === EncoderChunkAssembler::STATUS_OK) {
+        error_log("aVideoEncoderChunk.json.php: chunk " . ($result->chunk + 1) . "/{$result->total} file={$result->file} filesize={$result->filesize} complete=" . ($result->complete ? 'yes' : 'no') . (!empty($result->replay) ? ' (replay)' : '') . " file_id={$fileId} requestedBy=" . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        die(json_encode([
+            'file' => $result->file,
+            'filesize' => $result->filesize,
+            'chunk' => $result->chunk,
+            'total' => $result->total,
+            'complete' => $result->complete,
+        ]));
+    }
+
+    $httpCodeByStatus = [
+        EncoderChunkAssembler::STATUS_OUT_OF_ORDER => 409,
+        EncoderChunkAssembler::STATUS_STATE_CORRUPT => 409,
+        EncoderChunkAssembler::STATUS_TOO_LARGE => 413,
+        EncoderChunkAssembler::STATUS_SIZE_MISMATCH => 400,
+        EncoderChunkAssembler::STATUS_COMMIT_FAILED => 500,
+    ];
+    http_response_code($httpCodeByStatus[$result->status] ?? 500);
+    error_log("aVideoEncoderChunk.json.php: {$result->status} - {$result->msg}");
+    die(json_encode(['error' => true, 'msg' => $result->msg]));
+}
+
+// -----------------------------------------------------------------------
+// Legacy single-PUT mode (backward compatibility for older encoder builds)
+// -----------------------------------------------------------------------
+$obj       = new stdClass();
+$obj->file = tempnam(sys_get_temp_dir(), 'YTPChunk_');
+
+$putdata = fopen("php://input", "r");
+$fp      = fopen($obj->file, "w");
+
+error_log("aVideoEncoderChunk.json.php: start {$obj->file} ");
+
+$written = 0;
+while ($data = fread($putdata, 1024 * 1024)) {
+    $written += strlen($data);
+    if ($written > $maxBytes || $written > $maxTotalBytes) {
+        fclose($fp);
+        fclose($putdata);
+        @unlink($obj->file);
+        http_response_code(413);
+        error_log("aVideoEncoderChunk.json.php: stream exceeded limit at {$written} bytes, aborting");
+        die(json_encode(['error' => true, 'msg' => 'Payload too large']));
+    }
+    fwrite($fp, $data);
+}
+
+fclose($fp);
+fclose($putdata);
+sleep(1);
+$obj->filesize = filesize($obj->file);
+
+$json = json_encode($obj);
+
+error_log("aVideoEncoderChunk.json.php: {$json} ");
+
+die($json);

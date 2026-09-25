@@ -1,0 +1,3 @@
+<?php
+$report = ['id' => 'dtMyVideosRep', 'title' => 'Video performance', 'description' => 'Recorded viewing sessions and their watch time, grouped by video. The period selects when sessions started, including unpublished videos. Deleted detailed statistics are not included. Open a video for details. Watch time is shown as hours:minutes:seconds.', 'dated' => true, 'owner' => true, 'endpoint' => 'view/reportMyVideos.json.php', 'columns' => [['data' => 'title', 'title' => 'Video'], ['data' => 'total_views', 'title' => 'Views'], ['data' => 'seconds_watching_video', 'title' => 'Watch time', 'duration' => true]]];
+include __DIR__ . '/reportTable.php';

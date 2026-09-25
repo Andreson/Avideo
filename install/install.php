@@ -1,0 +1,63 @@
+<?php
+require_once __DIR__ . '/../objects/functions.php';
+if (!isCommandLineInterface()) {
+    die('Command Line only');
+}
+if (file_exists(__DIR__ . "/../videos/configuration.php")) {
+    die("Configuration already exists. Installation was not changed.\n");
+}
+
+
+$databaseUser = "youphptube";
+$databasePass = "youphptube";
+if (version_compare(phpversion(), '7.2', '<')) {
+    $databaseUser = "root";
+}
+
+$webSiteRootURL = @$argv[1];
+$webSiteRootURL = preg_replace("/[^0-9a-z._\/:-]/i", "", trim($webSiteRootURL));
+$databaseUser = empty($argv[2]) ? $databaseUser : $argv[2];
+$databasePass = empty($argv[3]) ? $databasePass : $argv[3];
+if (empty($argv[4])) {
+    echo "Enter admin password (leave blank to generate a random one): ";
+    @ob_flush();
+    $systemAdminPass = trim(readline(""));
+    if (empty($systemAdminPass)) {
+        $systemAdminPass = bin2hex(random_bytes(8));
+        echo "Generated admin password: {$systemAdminPass}\n";
+        echo "IMPORTANT: Save this password now, it will not be shown again.\n";
+    }
+} else {
+    $systemAdminPass = $argv[4];
+}
+$contactEmail = empty($argv[5]) ? "undefined@youremail.com" : $argv[5];
+if (!filter_var($webSiteRootURL, FILTER_VALIDATE_URL)) {
+    if (!empty($webSiteRootURL)) {
+        echo "Invalid Site URL ({$webSiteRootURL})\n";
+    }
+    echo "Enter Site URL\n";
+    @ob_flush();
+    $webSiteRootURL = trim(readline(""));
+    if (!filter_var($webSiteRootURL, FILTER_VALIDATE_URL)) {
+        die("Invalid Site URL ({$webSiteRootURL})\n");
+    }
+}
+
+$webSiteRootURL = rtrim($webSiteRootURL, '/') . '/';
+
+$_POST['systemRootPath'] = str_replace('\\', '/', dirname(__DIR__)) . '/';
+
+$_POST['databaseHost'] = "localhost";
+$_POST['databaseUser'] = $databaseUser;
+$_POST['databasePass'] = $databasePass;
+$_POST['databasePort'] = "3306";
+$_POST['databaseName'] = "AVideo_". preg_replace("/[^0-9a-z]/i", "", parse_url($webSiteRootURL, PHP_URL_HOST));
+$_POST['createTables'] = 2;
+$_POST['contactEmail'] = $contactEmail;
+$_POST['systemAdminPass'] = $systemAdminPass;
+$_POST['mainLanguage'] = "en";
+$_POST['webSiteTitle'] = "AVideo";
+$_POST['webSiteRootURL'] = $webSiteRootURL;
+
+include __DIR__ . '/checkConfiguration.php';
+if (empty($installerSucceeded)) { exit(1); }

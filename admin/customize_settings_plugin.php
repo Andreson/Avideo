@@ -1,0 +1,91 @@
+<div class="panel panel-default">
+    <div class="panel-heading"><?php echo __('Customize Footer, About and Meta Description'); ?> <div class="pull-right"><?php echo getPluginSwitch('Customize'); ?></div></div>
+    <div class="panel-body">
+        <?php
+        if (!AVideoPlugin::exists('Customize')) {
+            ?>
+            <div class="alert alert-info">
+                <?php echo __('Truly customize your AVideo and create a more professional video sharing site experience for your visitors by removing or replacing the footer, about page and Meta Description with your own.'); ?>
+                <a class="btn btn-info btn-sm btn-xs" href="https://streamphp.com/marketplace/"><?php echo __('Buy the Customize plugin now'); ?></a>
+            </div>
+            <?php
+            return false;
+        } else {
+            require_once $global['systemRootPath'] . 'plugin/Customize/Objects/ExtraConfig.php';
+
+            $ec = new ExtraConfig();
+            ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <form id="customizeForm">
+                        <div class="form-group">
+                            <label for="about" class="col-2 col-form-label">Text for About Page</label>
+                            <div class="col-10">
+                                <textarea id="about" placeholder="Enter the About text" style="width: 100%;"><?php echo $ec->getAbout(); ?></textarea>
+                                <?php
+                                echo getTinyMCE("about");
+                                ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="footer" class="col-2 col-form-label">Text for Footer</label>
+                            <div class="col-10">
+                                <textarea id="footer" placeholder="Enter the footer text" style="width: 100%;"><?php echo $ec->getFooter(); ?></textarea>
+                                <?php
+                                echo getTinyMCE("footer");
+                                ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description" class="col-2 col-form-label">MetaTag Description</label>
+                            <div class="col-10">
+                                <input class="form-control" type="text" placeholder="Description" id="description" value="<?php echo $ec->getDescription(); ?>">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block">Save</button>
+                    </form>
+                </div>
+            </div>
+            <?php
+        }
+        ?>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#customizeForm").submit(function (event) {
+            event.preventDefault();
+            var form = $(this);
+            if (form.data('saving')) {
+                return;
+            }
+            ['about', 'footer'].forEach(function(id) {
+                if (typeof tinymce !== 'undefined' && tinymce.get(id)) {
+                    tinymce.get(id).save();
+                }
+            });
+            form.data('saving', true).find(':submit').prop('disabled', true);
+            modal.showPleaseWait();
+            $.ajax({
+                url: webSiteRootURL + 'plugin/Customize/page/editorSave.php',
+                data: {"about": $('#about').val(), "footer": $('#footer').val(), "description": $('#description').val()},
+                type: 'post',
+                dataType: 'json',
+                success: function (response) {
+                    if (response && !response.error && response.save) {
+                        avideoToastSuccess(<?php echo json_encode(__('Saved')); ?>);
+                    } else {
+                        avideoToastError(<?php echo json_encode(__('An error occurred')); ?>);
+                    }
+                },
+                error: function () {
+                    avideoToastError(<?php echo json_encode(__('An error occurred')); ?>);
+                },
+                complete: function () {
+                    form.removeData('saving').find(':submit').prop('disabled', false);
+                    modal.hidePleaseWait();
+                }
+            });
+        });
+    });
+</script>

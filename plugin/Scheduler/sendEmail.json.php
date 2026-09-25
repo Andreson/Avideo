@@ -1,0 +1,87 @@
+<?php
+
+//streamer config
+require_once dirname(__FILE__) . '/../../videos/configuration.php';
+
+header('Content-Type: application/json');
+
+
+if(empty($_REQUEST['scheduler_commands_id'])){
+    forbiddenPage('scheduler_commands_id is empty');
+}
+
+if(empty($_REQUEST['token'])){
+    forbiddenPage('token is empty');
+}
+
+// purpose-bound salt: only a token minted by Scheduler::run() for this exact callback is accepted here,
+// never a generic site-wide/page token (e.g. Live/index.php's globalToken)
+if(!isTokenValid($_REQUEST['token'], 'SchedulerCallback')){
+    if (!isCommandLineInterface() && !User::isAdmin()) {
+        forbiddenPage('token is invalid');
+    }
+}
+
+if(!AVideoPlugin::isEnabledByName('Scheduler')){
+    forbiddenPage('Scheduler is disabled');
+}
+
+$e = new Scheduler_commands($_REQUEST['scheduler_commands_id']);
+
+$parameters = _json_decode($e->getParameters());
+//echo  $e->getParameters();
+//var_dump($parameters, $e->getParameters(), json_last_error_msg());exit;
+if(empty($parameters)){
+    forbiddenPage('paramenters is empty');
+}
+
+$parameters = object_to_array($parameters);
+
+if(empty($parameters['emailTo'])){
+    forbiddenPage('emailTo is empty');
+}
+
+$parameters['emailTo'] = is_email($parameters['emailTo']);
+if (empty($parameters['emailTo'])) {
+    forbiddenPage('emailTo is invalid');
+}
+
+if(emptyHTML($parameters['emailEmailBody'])){
+    forbiddenPage('emailEmailBody is empty');
+}
+
+// Store the original user email for Reply-To purposes
+$userEmail = null;
+$userEmailName = null;
+
+if(is_numeric($parameters['emailFrom'])){
+    $userEmailName = User::getNameIdentificationById($parameters['emailFrom']);
+    $userEmail = User::getEmailDb($parameters['emailFrom']);
+    $parameters['emailFromName'] = $userEmailName;
+    $parameters['emailFrom'] = $userEmail;
+} else if(!empty($parameters['emailFrom']) && filter_var($parameters['emailFrom'], FILTER_VALIDATE_EMAIL)) {
+    $userEmail = $parameters['emailFrom'];
+    $userEmailName = $parameters['emailFromName'] ?? '';
+}
+
+// Always use system email as the actual From address to avoid SMTP domain verification issues
+// The user's email will be added as Reply-To by the sendSiteEmail function
+if(empty($parameters['emailFrom']) || !filter_var($parameters['emailFrom'], FILTER_VALIDATE_EMAIL)){
+    $parameters['emailFrom'] = $config->getContactEmail();
+}
+
+if(empty($parameters['emailFromName'])){
+    $parameters['emailFromName'] = '';
+}
+
+if(empty($parameters['emailSubject'])){
+    $parameters['emailSubject'] = $config->getWebSiteTitle();
+}
+
+
+$obj = new stdClass();
+$obj->msg = '';
+$obj->parameters = $parameters;
+$obj->error = !sendSiteEmail($parameters['emailTo'], $parameters['emailSubject'], $parameters['emailEmailBody'], $parameters['emailFrom'], $parameters['emailFromName']);
+
+die(_json_encode($obj));

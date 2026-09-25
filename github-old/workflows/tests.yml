@@ -1,0 +1,131 @@
+name: Tests
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      mysql:
+        image: mariadb:10.11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+          --health-start-period=30s
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+
+    name: PHP ${{ matrix.php-version }} Tests
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+
+    - name: Checkout Encoder for installer tests
+      uses: actions/checkout@v7
+      with:
+        repository: WWBN/AVideo-Encoder
+        ref: 8f7404baa437b485f1115f79abb6b596c80a363d
+        path: .compose/encoder
+
+    - name: Checkout Encoder Network for cross-project installer tests
+      uses: actions/checkout@v7
+      with:
+        repository: WWBN/AVideo-Encoder-Network
+        ref: a10b55136a1c1afb1ef83cdef56ab1a1811f8b2b
+        path: .compose/network
+
+    - name: Set up Node for regression tests
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.14.0'
+
+    - name: Install frontend dependencies from lockfile
+      run: npm ci --ignore-scripts --no-fund --no-audit
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, xml, ctype, json, fileinfo, pdo, pdo_mysql, mysqli, gd, curl, zip, bcmath
+        coverage: xdebug
+    
+    - name: Validate composer.json
+      run: composer validate --strict
+
+    - name: Install media tools for installer integration tests
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends -y ffmpeg
+        ffmpeg -version
+        ffprobe -version
+    
+    - name: Clear Composer cache
+      run: composer clear-cache
+    
+    - name: Remove vendor directory
+      run: rm -rf vendor
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction --no-cache --optimize-autoloader
+    
+    - name: Verify PHPUnit installation
+      run: |
+        test -f vendor/phpunit/phpunit/src/Framework/Test.php || (echo "PHPUnit Test.php missing!" && exit 1)
+        php vendor/bin/phpunit --version
+    
+    - name: Run all PHPUnit suites (required)
+      env:
+        AVIDEO_INSTALLER_MYSQL_TESTS: '1'
+        AVIDEO_TEST_DB_HOST: 127.0.0.1
+        AVIDEO_TEST_DB_PORT: 3306
+        AVIDEO_TEST_DB_USER: root
+        AVIDEO_TEST_DB_PASSWORD: ''
+        AVIDEO_TEST_ENCODER_ROOT: ${{ github.workspace }}/.compose/encoder
+        AVIDEO_TEST_NETWORK_ROOT: ${{ github.workspace }}/.compose/network
+      run: php vendor/bin/phpunit --colors=never --fail-on-risky --fail-on-incomplete --coverage-clover=coverage.xml
+
+    - name: Run standalone PHP regressions (required)
+      run: |
+        for test in tests/*-regression.php; do
+          php "$test"
+        done
+
+    - name: Run JavaScript and workflow regressions (required)
+      run: |
+        for test in tests/Integration/*.js; do
+          node "$test"
+        done
+        node --test .github/tests/*.test.cjs
+    
+    - name: Upload coverage to Codecov
+      if: matrix.php-version == '8.3'
+      uses: codecov/codecov-action@v7
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false

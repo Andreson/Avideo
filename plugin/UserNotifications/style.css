@@ -1,0 +1,132 @@
+#topMenuUserNotifications {
+    display: list-item !important;
+}
+
+#topMenuUserNotifications > ul {
+    width: 420px;
+    min-width: 0;
+    max-width: calc(100vw - 16px);
+    padding: 8px;
+    border-radius: 14px;
+    white-space: normal;
+}
+
+#topMenuUserNotifications>ul>div.list-group {
+    overflow-x: hidden;
+}
+
+#topMenuUserNotifications > a > span.badge{
+    position: absolute;
+    top: 28px;
+    left: 24px;
+    z-index: 50;
+}
+
+#topMenuUserNotifications span.badge-notify{
+    background:red;
+}
+
+#topMenuUserNotifications.hasNothingToShow .hideWhenHasNothingToShow,
+#topMenuUserNotifications.hasSomethingToShow .hideWhenHasSomethingToShow,
+#topMenuUserNotifications.hasNothingToDelete .hideWhenHasNothingToDelete{
+    display: none;
+}
+
+#topMenuUserNotifications .dropdown-menu .list-group{
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+    flex: 1 1 auto;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+}
+
+#topMenuUserNotifications .dropdown-menu img{
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    object-position: center;
+    margin: 0;
+}
+
+#topMenuUserNotifications > ul .list-group a {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+}
+
+#topMenuUserNotifications > ul .list-group a > div > div.media-body > strong{
+    white-space: normal;
+    display: block;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+
+}
+#topMenuUserNotifications .icon{
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    padding: 2px 4px;
+    border-radius: 20px;
+    opacity: 0.8;
+}
+#topMenuUserNotifications .dropdown-menu .list-group .deleteBtn{
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    border-width: 0;
+    display: none;
+    opacity: 0.8;
+    background-color: transparent;
+}
+#topMenuUserNotifications .dropdown-menu .list-group .deleteBtn:hover{
+    opacity: 1;
+}
+#topMenuUserNotifications .dropdown-menu .list-group div.canDelete:hover .deleteBtn{
+    display: inline-block;
+}
+#topMenuUserNotifications .dropdown-menu .list-group .priority > div{
+    position: relative;
+}
+
+.check-with-label + .label-for-check {
+  opacity: 0.5;
+}
+.check-with-label:checked + .label-for-check {
+  opacity: 1;
+}
+
+@media (max-width: 767px) {
+    #topMenuUserNotifications .dropdown-menu .list-group{
+        max-height: calc(100vh - 300px);
+    }
+
+}
+
+/* Keep the header and filters visible while only the notifications scroll. */
+#topMenuUserNotifications.open > .notificationMenu { display: flex; flex-direction: column; }
+#mainNavBar #myNavbar .notificationMenu.navbarScrollDropdown { overflow: hidden; }
+.notificationMenu > :not(.list-group) { flex: 0 0 auto; }
+#mainNavBar #topMenuUserNotifications .notificationHeading,
+#topMenuUserNotifications .notificationHeading { padding: 8px 10px 12px; font-size: 16px; font-weight: 600; color: inherit; }
+#mainNavBar #topMenuUserNotifications .notificationEmpty,
+#topMenuUserNotifications .notificationEmpty { padding: 24px 12px; }
+#topMenuUserNotifications .media { display: flex; gap: 12px; margin: 0; align-items: flex-start; }
+#topMenuUserNotifications .media-left { display: block; flex: 0 0 48px; padding: 0; }
+#topMenuUserNotifications .media-body { display: block; flex: 1; width: auto; min-width: 0; overflow-wrap: anywhere; }
+#topMenuUserNotifications .media-body p { margin: 5px 0 8px; line-height: 1.5; white-space: normal; }
+#topMenuUserNotifications .media-body small { display: block; float: none !important; margin-top: 8px; opacity: .75; }
+#topMenuUserNotifications > ul .list-group .canDelete > a { padding-right: 38px; }
+#topMenuUserNotifications .dropdown-menu .list-group .canDelete .deleteBtn { display: inline-block; width: 28px; min-width: 28px; max-width: 28px; height: 28px; padding: 0; border-radius: 50%; }
+#topMenuUserNotifications .list-group-item:hover { background: color-mix(in srgb, currentColor 7%, transparent); }
+#topMenuUserNotifications .list-group-item:focus-visible,
+#topMenuUserNotifications .deleteBtn:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+#userNotificationsFilterButtons > .btn-group { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 2px; }
+#userNotificationsFilterButtons .label-for-check { width: auto; flex: 0 1 auto; border-radius: 16px; padding: 6px 10px; }
+@media (prefers-reduced-motion: reduce) {
+    #topMenuUserNotifications .priority { animation: none !important; }
+}
+
+#topMenuUserNotifications .userNotifications > .list-group-item:not(.active) { color: inherit; }

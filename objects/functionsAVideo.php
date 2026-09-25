@@ -1,0 +1,267 @@
+<?php
+
+$AVideoMobileAPPLivestreamer_UA = "AVideoMobileAppLiveStreamer";
+$AVideoMobileAPP_UA = "AVideoMobileApp";
+$AVideoEncoder_UA = "AVideoEncoder";
+$AVideoEncoderNetwork_UA = "AVideoEncoderNetwork";
+$AVideoStreamer_UA = "AVideoStreamer";
+$AVideoStorage_UA = "AVideoStorage";
+$AVideoRestreamer_UA = "AVideoRestreamer";
+
+function isAVideoMobileApp($user_agent = "")
+{
+    if (empty($user_agent)) {
+        $user_agent = @$_SERVER['HTTP_USER_AGENT'];
+    }
+    if (empty($user_agent)) {
+        return false;
+    }
+    global $AVideoMobileAPP_UA;
+    if (preg_match("/{$AVideoMobileAPP_UA}(.*)/", $user_agent, $match)) {
+        $url = trim($match[1]);
+        if (!empty($url)) {
+            return $url;
+        }
+        return true;
+    }
+    return false;
+}
+
+function isAVideoEncoder($user_agent = "")
+{
+    if (empty($user_agent)) {
+        $user_agent = @$_SERVER['HTTP_USER_AGENT'];
+    }
+    if (empty($user_agent)) {
+        return false;
+    }
+    global $AVideoEncoder_UA;
+    if (preg_match("/{$AVideoEncoder_UA}(.*)/", $user_agent, $match)) {
+        $url = trim($match[1]);
+        if (!empty($url)) {
+            return $url;
+        }
+        return true;
+    }
+    return false;
+}
+
+function isCDN()
+{
+    if (empty($_SERVER['HTTP_CDN_HOST'])) {
+        return false;
+    }
+    return isFromCDN($_SERVER['HTTP_CDN_HOST']);
+}
+
+function isFromCDN($url)
+{
+    if (preg_match('/cdn.ypt.me/i', $url)) {
+        return true;
+    }
+    return false;
+}
+
+function isAVideo($user_agent = "")
+{
+    if (empty($user_agent)) {
+        $user_agent = @$_SERVER['HTTP_USER_AGENT'];
+    }
+    if (empty($user_agent)) {
+        return false;
+    }
+    global $AVideoEncoder_UA;
+    if (preg_match("/AVideo(.*)/", $user_agent, $match)) {
+        $url = trim($match[1]);
+        if (!empty($url)) {
+            return $url;
+        }
+        return true;
+    }
+    return false;
+}
+
+function isAVideoEncoderOnSameDomain()
+{
+    $url = isAVideoEncoder();
+    if (empty($url)) {
+        return false;
+    }
+    $url = "http://{$url}";
+    return isSameDomainAsMyAVideo($url);
+}
+
+function isSameDomainAsMyAVideo($url)
+{
+    global $global;
+    if (empty($url)) {
+        return false;
+    }
+    return isSameDomain($url, $global['webSiteRootURL']) || isSameDomain($url, getCDN());
+}
+
+function isAVideoStreamer($user_agent = "")
+{
+    if (empty($user_agent)) {
+        $user_agent = @$_SERVER['HTTP_USER_AGENT'];
+    }
+    if (empty($user_agent)) {
+        return false;
+    }
+    global $AVideoStreamer_UA, $global;
+    // SECURITY: prefer saltV2 (CSPRNG) over legacy salt (uniqid-derived, brute-forceable)
+    $activeSalt = !empty($global['saltV2']) ? $global['saltV2'] : $global['salt'];
+    $md5 = md5($activeSalt);
+    if (preg_match("/{$AVideoStreamer_UA}_{$md5}/", $user_agent)) {
+        return true;
+    }
+    return false;
+}
+
+function isAVideoUserAgent($user_agent = "")
+{
+    global $lastMatchedAVideoUserAgent;
+    $lastMatchedAVideoUserAgent = ''; // Reset to ensure clean state
+
+    if (empty($user_agent)) {
+        $user_agent = @$_SERVER['HTTP_USER_AGENT'];
+    }
+    if (empty($user_agent)) {
+        return false;
+    }
+    global $AVideoMobileAPP_UA, $AVideoEncoder_UA, $AVideoEncoderNetwork_UA, $AVideoStreamer_UA, $AVideoStorage_UA, $AVideoRestreamer_UA, $global;
+
+    // Lavf = ffmpeg
+    //$agents = [$AVideoMobileAPP_UA, $AVideoEncoder_UA, $AVideoEncoderNetwork_UA, $AVideoStreamer_UA, $AVideoStorage_UA, 'Lavf'];
+    $agents = [$AVideoMobileAPP_UA, $AVideoEncoder_UA, $AVideoEncoderNetwork_UA, $AVideoStreamer_UA, $AVideoStorage_UA, $AVideoRestreamer_UA];
+
+    foreach ($agents as $value) {
+        // CRITICAL FIX: Only check if value is not empty to prevent false matches with empty regex
+        if (!empty($value) && preg_match("/{$value}/", $user_agent)) {
+            $lastMatchedAVideoUserAgent = $value;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function isAVideoStorage($user_agent = "")
+{
+    if (empty($user_agent)) {
+        $user_agent = @$_SERVER['HTTP_USER_AGENT'];
+    }
+    if (empty($user_agent)) {
+        return false;
+    }
+    global $AVideoStorage_UA;
+    if (preg_match("/{$AVideoStorage_UA}(.*)/", $user_agent, $match)) {
+        $url = trim($match[1]);
+        if (!empty($url)) {
+            return $url;
+        }
+        return true;
+    }
+    return false;
+}
+
+
+function getSelfUserAgent()
+{
+    global $global, $AVideoStreamer_UA;
+    if(empty($AVideoStreamer_UA)){
+        $AVideoStreamer_UA = 'AVideoStreamer';
+    }
+    $agent = $AVideoStreamer_UA . "_";
+    // SECURITY: prefer saltV2 (CSPRNG) over legacy salt (uniqid-derived, brute-forceable)
+    $activeSalt = !empty($global['saltV2']) ? $global['saltV2'] : $global['salt'];
+    $agent .= md5($activeSalt.date('i'));
+    return $agent;
+}
+
+function isSelfUserAgent()
+{
+    global $global, $AVideoStreamer_UA;
+
+    if (preg_match('/GStreamer souphttpsrc/', $_SERVER['HTTP_USER_AGENT'])) {
+        return true;
+    }
+
+    // SECURITY: prefer saltV2 (CSPRNG) over legacy salt (uniqid-derived, brute-forceable)
+    $activeSalt = !empty($global['saltV2']) ? $global['saltV2'] : $global['salt'];
+
+    // Generate the current and 1-minute previous user agent strings
+    $currentAgent = $AVideoStreamer_UA . "_" . md5($activeSalt . date('i'));
+    $previousAgent = $AVideoStreamer_UA . "_" . md5($activeSalt . date('i', strtotime('-1 minute')));
+
+    // Check if the provided user agent matches either the current or previous
+    if ($_SERVER['HTTP_USER_AGENT'] === $currentAgent || $_SERVER['HTTP_USER_AGENT'] === $previousAgent) {
+        return true;
+    }
+
+    return false;
+}
+
+
+function requestComesFromSameDomainAsMyAVideo()
+{
+    global $global;
+    $url = getRefferOrOrigin();
+    //var_dump($_SERVER);exit;
+    //_error_log("requestComesFromSameDomainAsMyAVideo: ({$url}) == ({$global['webSiteRootURL']})");
+    return isSameDomain($url, $global['webSiteRootURL']) || isSameDomain($url, getCDN()) || isFromCDN($url);
+}
+
+define('E_FATAL', E_ERROR | E_USER_ERROR | E_PARSE | E_CORE_ERROR |
+    E_COMPILE_ERROR | E_RECOVERABLE_ERROR);
+if (!isCommandLineInterface() && !isAVideoEncoder()) {
+    register_shutdown_function('avideoShutdown');
+}
+
+function avideoShutdown()
+{
+    global $global, $cache_setCacheToSaveAtTheEnd;
+
+    // Log session performance if applicable
+    if (function_exists('_log_session_performance')) {
+        _log_session_performance('script_end');
+    }
+
+    $error = error_get_last();
+    if ($error && ($error['type'] & E_FATAL)) {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $traceLines = [];
+        foreach ($trace as $i => $frame) {
+            $file = $frame['file'] ?? '[unknown]';
+            $line = $frame['line'] ?? 0;
+            $func = ($frame['class'] ?? '') . ($frame['type'] ?? '') . ($frame['function'] ?? '');
+            $traceLines[] = "#$i $file($line): $func";
+        }
+        _error_log($error, AVideoLog::$ERROR);
+        _error_log('BACKTRACE: ' . PHP_EOL . implode(PHP_EOL, $traceLines), AVideoLog::$ERROR);
+        header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+        if (!User::isAdmin()) {
+            if (!preg_match('/json\.php$/i', $_SERVER['PHP_SELF'])) {
+                echo '<!-- This page means an error 500 Internal Server Error, check your log file -->' . PHP_EOL;
+                include $global['systemRootPath'] . 'view/maintanance.html';
+            } else {
+                $o = new stdClass();
+                $o->error = true;
+                $o->msg = ('Under Maintenance');
+                echo json_encode($o);
+            }
+        } else {
+            echo '<pre>';
+            var_dump($error);
+            echo '</pre>';
+        }
+        exit;
+    }else{
+        if(class_exists('Cache') && !empty($cache_setCacheToSaveAtTheEnd)){
+            // Save deferred cache only while the database connection is valid.
+            if (_mysql_is_open()) {
+                Cache::saveCache();
+            }
+        }
+    }
+}

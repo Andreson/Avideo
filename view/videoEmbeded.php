@@ -1,0 +1,591 @@
+<?php
+/**
+ * Embedded Video Player
+ *
+ * Displays a video in an embeddable format with configurable parameters via URL
+ *
+ * URL Parameters (see objects/EmbedPlayerConfig.php for details):
+ * - autoplay=1           : Auto-start video
+ * - controls=0|-1|-2     : Control visibility (0=none, -1=basic, -2=basic no progress)
+ * - mute=1               : Start muted
+ * - loop=1               : Loop video
+ * - modestbranding=1     : Remove extra branding
+ * - showinfo=0           : Hide top info bar
+ * - objectFit=cover      : Video object-fit CSS
+ * - t=30                 : Start time in seconds
+ * - showBigButton=1      : Show large play button
+ * - forceCloseButton=1   : Force close button display
+ * - disableCloseButton=1 : Hide the iframe close button
+ * - disableOwnerImage=1  : Hide owner image but keep top info
+ * - disableShareButton=1 : Hide the share button
+ * - hideAutoplaySwitch=1 : Hide the autoplay toggle
+ * - closeOnEnd=1         : Close player when video ends
+ * - disableContextMenu=1 : Block the right-click/long-press menu without showing its items
+ *
+ * Example: ?autoplay=1&mute=1&controls=-1&loop=1&t=10
+ */
+
+global $isEmbed;
+$isEmbed = 1;
+global $global, $config;
+if (!isset($global['systemRootPath'])) {
+    require_once '../videos/configuration.php';
+}
+$global['bypassSameDomainCheck'] = 1;
+User::loginFromRequestIfNotLogged();
+if (!empty($_GET['evideo'])) {
+    $v = Video::decodeEvideo();
+    $evideo = $v['evideo'];
+}
+if (!empty($evideo)) {
+    $video = $v['video'];
+    $img = $evideo->thumbnails;
+    $poster = $evideo->thumbnails;
+    $imgw = 1280;
+    $imgh = 720;
+    $autoPlaySources = [];
+    $autoPlayURL = '';
+    $autoPlayPoster = '';
+    $autoPlayThumbsSprit = '';
+} else {
+    $videos_id = getVideos_id();
+    if (!empty($videos_id)) {
+        $video = Video::getVideo($videos_id, Video::SORT_TYPE_VIEWABLE, false, false, false, true);
+    } elseif (!empty($_GET['videoName'])) {
+        $video = Video::getVideoFromCleanTitle($_GET['videoName']);
+    }
+}
+Video::unsetAddView($video['id']);
+
+AVideoPlugin::getEmbed($video['id']);
+
+if (empty($video)) {
+    $msg = __('Video not found');
+    if (User::isAdmin()) {
+        $msg = "{$msg} " . json_encode($_GET);
+    }
+    forbiddenPage($msg);
+}
+if ($video['status'] == 'i') {
+    forbiddenPage("Video inactive");
+}
+if (empty($video['users_id'])) {
+    $video['users_id'] = User::getId();
+}
+if (empty($customizedAdvanced)) {
+    $customizedAdvanced = AVideoPlugin::getObjectDataIfEnabled('CustomizeAdvanced');
+}
+
+forbiddenPageIfCannotEmbed($video['id']);
+
+$source = [];
+$img = '';
+$imgw = 1280;
+$imgh = 720;
+
+if ($video['type'] !== Video::$videoTypePdf) {
+    if (!empty($video['filename'])) {
+        $source = Video::getSourceFile($video['filename'], '.jpg', false, true);
+        $poster = $img = $source['url'];
+        $data = getimgsize($source['path']);
+        $imgw = $data[0];
+        $imgh = $data[1];
+    }
+}
+
+if (empty($poster)) {
+    $poster = '';
+    if (!empty($video['filename'])) {
+        $images = Video::getImageFromFilename($video['filename']);
+        $poster = $images->poster;
+        if (!empty($images->posterPortrait)) {
+            $img = $images->posterPortrait;
+            $data = getimgsize($source['path']);
+            $imgw = $data[0];
+            $imgh = $data[1];
+        }
+    } else {
+        $images = [];
+        $poster = '';
+        $imgw = 0;
+        $imgh = 0;
+    }
+    if (empty($poster) && !empty($video['filename'])) {
+        if (($video['type'] !== "audio") && ($video['type'] !== "linkAudio")) {
+            $poster = "{$global['webSiteRootURL']}videos/{$video['filename']}.jpg";
+        } else {
+            $poster = ImagesPlaceHolders::getAudioLandscape(ImagesPlaceHolders::$RETURN_URL);
+        }
+    }
+}
+
+require_once $global['systemRootPath'] . 'plugin/AVideoPlugin.php';
+require_once $global['systemRootPath'] . 'objects/EmbedPlayerConfig.php';
+
+/*
+ * Swap aspect ratio for rotated (vvs) videos
+ * This is currently disabled but kept for reference
+
+  if ($video['rotation'] === "90" || $video['rotation'] === "270") {
+  $embedResponsiveClass = "embed-responsive-9by16";
+  $vjsClass = "vjs-9-16";
+  } else {
+  $embedResponsiveClass = "embed-responsive-16by9";
+  $vjsClass = "vjs-16-9";
+  } */
+
+$obj = new Video("", "", $video['id']);
+$resp = $obj->addView();
+
+// Initialize embed player configuration
+// URL params: modestbranding, showinfo, autoplay, controls, loop, mute, t, objectFit, showBigButton,
+// forceCloseButton, disableCloseButton, disableOwnerImage, disableShareButton, hideAutoplaySwitch, closeOnEnd
+// Example: ?autoplay=1&controls=0&loop=1&mute=1&t=30
+$embedConfig = new EmbedPlayerConfig($video, $config);
+
+// Validate configuration (optional - logs errors if any)
+$validation = $embedConfig->validate();
+if ($validation !== true && User::isAdmin()) {
+    error_log("EmbedPlayerConfig validation errors: " . implode(", ", $validation));
+}
+
+// Legacy variables for backward compatibility (deprecated - use $embedConfig instead)
+$modestbranding = $embedConfig->isModestbranding();
+$autoplay = $embedConfig->isAutoplay();
+$controls = $embedConfig->getControls();
+$showOnlyBasicControls = $embedConfig->showOnlyBasicControls();
+$hideProgressBarAndUnPause = $embedConfig->hideProgressBarAndUnPause();
+$loop = $embedConfig->getLoop();
+$mute = $embedConfig->getMute();
+$objectFit = $embedConfig->getObjectFit();
+$t = $embedConfig->getStartTime();
+$disableEmbedTopInfo = $embedConfig->isEmbedTopInfoDisabled();
+$vjsClass = $embedConfig->getVjsClass();
+
+$url = Video::getLink($video['id'], $video['clean_title'], false);
+$title = str_replace('"', '', $video['title']) . ' - ' . $config->getWebSiteTitle();
+$photo = User::getPhoto($video['users_id']);
+
+if (empty($currentTime)) {
+    $currentTime = 0;
+}
+
+if (User::hasBlockedUser($video['users_id'])) {
+    $disableEmbedTopInfo = true;
+    $video['type'] = "blockedUser";
+}
+?>
+<!DOCTYPE html>
+<html lang="<?php echo getLanguage(); ?>">
+
+<head>
+    <meta name="robots" content="noindex">
+    <?php
+    //echo AVideoPlugin::getHeadCode();
+    ?>
+    <script>
+        var isEmbed = true;
+        window.addEventListener('message', function(event) {
+            if (event.data === 'togglePlayerSocial') {
+                if (typeof togglePlayerSocial === 'function') {
+                    togglePlayerSocial();
+                } else if ($('.ShortsPlayerIframe').length) {
+                    $('.ShortsPlayerIframe')[0].contentWindow.postMessage('togglePlayerSocial', '*');
+                } else {
+                    console.warn('togglePlayerSocial function is not defined and iframe not available for postMessage');
+                    <?php
+                    $objP = AVideoPlugin::getObjectData('PlayerSkins');
+                    $videos_id = getVideos_id();
+                    if(!$objP->showShareSocial){
+                        echo 'console.warn("(togglePlayerSocial) PlayerSkins->showShareSocial is disabled");';
+                    }else{
+                        echo 'console.log("(togglePlayerSocial) PlayerSkins->showShareSocial is enabled");';
+                    }
+
+                    if(empty($videos_id)){
+                        echo 'console.warn("(togglePlayerSocial) videos_id is not set");';
+                    }else if(!CustomizeUser::canShareVideosFromVideo($videos_id)){
+                        echo 'console.warn("(togglePlayerSocial) CustomizeUser->canShareVideosFromVideo is false ['.$videos_id.']");';
+                    }else{
+                        echo 'console.log("(togglePlayerSocial) CustomizeUser->canShareVideosFromVideo is true ['.$videos_id.']");';
+                    }
+                    ?>
+                }
+            }
+        });
+    </script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="<?php echo $config->getFavicon(); ?>">
+    <title><?php echo $video['title'] . $config->getPageTitleSeparator() . $config->getWebSiteTitle(); ?></title>
+    <link href="<?php echo getURL('view/bootstrap/css/bootstrap.min.css'); ?>" rel="stylesheet" type="text/css" />
+
+    <link href="<?php echo getURL('node_modules/video.js/dist/video-js.min.css'); ?>" rel="stylesheet" type="text/css" />
+    <link href="<?php echo getURL('node_modules/@fortawesome/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet" type="text/css" />
+
+    <link href="<?php echo getURL('node_modules/jquery-toast-plugin/dist/jquery.toast.min.css'); ?>" rel="stylesheet" type="text/css" />
+
+    <link rel="image_src" href="<?php echo $img; ?>" />
+
+    <script src="<?php echo getURL('node_modules/jquery/dist/jquery.min.js'); ?>" type="text/javascript"></script>
+    <script src="<?php echo getURL('view/js/script.js'); ?>" type="text/javascript"></script>
+    <script src="<?php echo getURL('node_modules/js-cookie/dist/js.cookie.js'); ?>" type="text/javascript"></script>
+    <style>
+        body {
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: hidden;
+        }
+
+        .video-js {
+            position: static;
+        }
+
+        #topInfo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 52px;
+            font: 12px Roboto, Arial, sans-serif;
+            color: #FFF;
+            padding: 15px;
+            background-image: linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+            overflow: hidden;
+
+        }
+
+        #topInfo a {
+            color: #EEE;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 1);
+        }
+
+        #topInfo a:hover {
+            color: #FFF;
+        }
+
+        #topInfo img {
+            float: left;
+            max-height: 40px;
+            max-width: 40px;
+            margin-right: 10px;
+        }
+
+        #topInfo div {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            display: flex;
+            height: 40px;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            margin-left: 65px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #blockUserTop {
+            position: absolute;
+            right: 25px;
+            top: 25px;
+        }
+
+
+        /* Dynamic CSS generated by EmbedPlayerConfig based on URL parameters */
+        <?php echo $embedConfig->getCustomCSS(); ?>
+
+        #main-video,
+        #main-video iframe {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <?php
+    include $global['systemRootPath'] . 'view/include/head.php';
+    getOpenGraph($video['id']);
+    getLdJson($video['id']);
+
+    // Debug info for admins
+    if (User::isAdmin()) {
+        echo "<!-- EmbedPlayerConfig: " . htmlspecialchars($embedConfig->toJson()) . " -->\n";
+    }
+    ?>
+</head>
+
+<body>
+    <?php
+    if ($video['type'] == "blockedUser") {
+    ?>
+
+        <!-- blockedUser -->
+        <video id="mainVideo" style="display: none; height: 0;width: 0;"></video>
+        <center style="height: 100%;">
+            <br>
+            <i class="fas fa-user-slash fa-3x"></i>
+            <hr>
+            You've blocked user (<?php echo User::getNameIdentificationById($video['users_id']) ?>)<br>
+            You won't see any comments or videos from this user
+            <hr>
+            <?php echo User::getblockUserButton($video['users_id']); ?>
+            <br>
+            <br>
+        </center>
+    <?php
+    } elseif ($video['type'] == Video::$videoTypeSerie) {
+    ?>
+        <!-- serie -->
+        <video id="mainVideo" style="display: none; height: 0;width: 0;"></video>
+        <iframe style="width: 100%; height: 100%;" class="embed-responsive-item" src="<?php echo $global['webSiteRootURL']; ?>plugin/PlayLists/embed.php?playlists_id=<?php
+                                                                                                                                                                        echo $video['serie_playlists_id'];
+                                                                                                                                                                         if ($embedConfig->isAutoplay()) {
+                                                                                                                                                                             echo "&autoplay=1";
+                                                                                                                                                                         }
+                                                                                                                                                                         if ($embedConfig->isCloseButtonDisabled()) {
+                                                                                                                                                                             echo "&disableCloseButton=1";
+                                                                                                                                                                         } elseif ($embedConfig->forceCloseButton()) {
+                                                                                                                                                                             echo "&forceCloseButton=1";
+                                                                                                                                                                         }
+                                                                                                                                                                         ?>"></iframe>
+        <script>
+            $(document).ready(function() {
+                addView(<?php echo $video['id']; ?>, 0);
+            });
+        </script>
+    <?php
+    } elseif ($video['type'] == Video::$videoTypeArticle) {
+    ?>
+        <!-- article -->
+        <div id="main-video" class="bgWhite list-group-item ypt-article" style="max-height: 100vh; overflow: hidden; overflow-y: auto; font-size: 1.5em;">
+            <h1 style="font-size: 1.5em; font-weight: bold; text-transform: uppercase; border-bottom: #CCC solid 1px;">
+                <?php echo $video['title']; ?>
+            </h1>
+            <?php echo Video::htmlDescription($video['description']); ?>
+            <script>
+                $(document).ready(function() {
+                    addCloseButtonInPage();
+                    addView(<?php echo $video['id']; ?>, 0);
+                });
+            </script>
+
+        </div>
+    <?php
+    } elseif ($video['type'] == Video::$videoTypePdf) {
+        $sources = getVideosURLPDF($video['filename']);
+    ?>
+        <!-- pdf -->
+        <video id="mainVideo" style="display: none; height: 0;width: 0;"></video>
+        <iframe style="width: 100%; height: 100%;" class="embed-responsive-item" src="<?php echo $sources["pdf"]['url']; ?>"></iframe>
+        <script>
+            $(document).ready(function() {
+                addCloseButtonInPage();
+                addView(<?php echo $video['id']; ?>, 0);
+            });
+        </script>
+        <?php
+    } elseif ($video['type'] == Video::$videoTypeImage) {
+        if (AVideoPlugin::isEnabledByName('ImageGallery') && !empty(ImageGallery::listFiles($video['id']))) {
+        ?>
+            <!-- ImageGallery <?php echo basename(__FILE__); ?> -->
+            <video id="mainVideo" style="display: none; height: 0;width: 0;"></video>
+            <iframe style="width: 100%; height: 100%;" class="embed-responsive-item" src="<?php echo $global['webSiteRootURL']; ?>plugin/ImageGallery/?avideoIframe=1&videos_id=<?php echo $video['id']; ?>"></iframe>
+            <script>
+                $(document).ready(function() {
+                    addView(<?php echo $video['id']; ?>, 0);
+                });
+            </script>
+        <?php
+        } else {
+            $sources = getVideosURLIMAGE($video['filename']);
+        ?>
+            <!-- image -->
+            <img src="<?php
+                        echo $sources["image"]['url']
+                        ?>" class="img img-responsive center-block" style="height: 100%;">
+            <script>
+                $(document).ready(function() {
+                    addCloseButtonInPage();
+                    addView(<?php echo $video['id']; ?>, 0);
+                });
+            </script>
+        <?php
+        }
+    } elseif ($video['type'] == Video::$videoTypeZip) {
+        $sources = getVideosURLZIP($video['filename']);
+        ?>
+        <!-- zip -->
+        <div class="panel panel-default">
+            <div class="panel-heading"><i class="far fa-file-archive"></i> <?php echo $video['title']; ?></div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <?php
+                    $za = new ZipArchive();
+                    $za->open($sources['zip']["path"]);
+                    for ($i = 0; $i < $za->numFiles; $i++) {
+                        $stat = $za->statIndex($i);
+                        $fname = basename($stat['name']);
+                    ?>
+                        <li class="list-group-item" style="text-align: left;"><i class="<?php echo fontAwesomeClassName($fname) ?>"></i> <?php echo $fname; ?></li>
+                    <?php }
+                    ?>
+                </ul>
+            </div>
+        </div>
+    <?php
+    } elseif ($video['type'] == Video::$videoTypeEmbed) {
+        $isVideoTypeEmbed = 1;
+    ?>
+        <!-- embed <?php echo basename(__FILE__); ?> -->
+        <video id="mainVideo" style="display: none; height: 0;width: 0;"></video>
+        <iframe style="width: 100%; height: 100%;" class="embed-responsive-item" src="<?php
+                                                                                        $url = parseVideos($video['videoLink']);
+                                                                                        if ($embedConfig->isAutoplay()) {
+                                                                                            $url = addQueryStringParameter($url, 'autoplay', 1);
+                                                                                        }
+                                                                                        echo $url;
+                                                                                        ?>"></iframe>
+        <script>
+            $(document).ready(function() {
+                addView(<?php echo $video['id']; ?>, 0);
+            });
+        </script>
+    <?php
+    } elseif ($video['type'] == Video::$videoTypeAudio && !file_exists(Video::getPathToFile("{$video['filename']}.mp4"))) {
+        $isAudio = 1;
+    ?>
+        <!-- audio videoEmbed -->
+        <audio style="width: 100%; height: 100%;" id="mainVideo" <?php echo $embedConfig->getVideoAttributes(); ?> class="center-block video-js vjs-default-skin vjs-big-play-centered" data-setup='{ "fluid": true }' poster="<?php echo $poster; ?>">
+            <?php echo getSources($video['filename']); ?>
+        </audio>
+        <script>
+            <?php PlayerSkins::playerJSCodeOnLoad($video['id']); ?>
+        </script>
+    <?php
+    } elseif ($video['type'] == Video::$videoTypeLinkVideo || $video['type'] == "liveLink") {
+        $t = ['id' => $_GET['link']];
+    ?>
+        <!-- videoLink include liveVideo.php [<?php echo htmlspecialchars($_GET['link'], ENT_QUOTES | ENT_HTML5); ?>] -->
+        <?php
+        include_once $global['systemRootPath'] . 'plugin/LiveLinks/view/liveVideo.php';
+        if ($video['type'] == "liveLink") {
+            echo getLiveUsersLabelHTML();
+        }
+        ?>
+        <script>
+            <?php PlayerSkins::playerJSCodeOnLoad($video['id']); ?>
+        </script>
+    <?php
+    } else {
+    ?>
+        <!-- Default video player -->
+        <video style="<?php echo $embedConfig->getVideoStyle(); ?>" <?php echo PlayerSkins::getPlaysinline(); ?> preload="none" poster="<?php echo $poster; ?>" <?php echo $embedConfig->getVideoAttributes(); ?> crossorigin="anonymous" class="video-js vjs-default-skin vjs-big-play-centered <?php echo $embedConfig->getVjsClass(); ?> " id="mainVideo">
+            <?php echo getSources($video['filename']); ?>
+            <p><?php echo __("If you can't view this video, your browser does not support HTML5 videos"); ?></p>
+        </video>
+        <script>
+            <?php PlayerSkins::playerJSCodeOnLoad($video['id']); ?>
+        </script>
+    <?php
+        //exit;
+    }
+    if (empty($disableEmbedTopInfo)) {
+    ?>
+        <div id="topInfoTemplate" class="hideOnPlayerUserInactive" style="display: none;">
+            <a href="<?php echo $url; ?>" target="_blank">
+                <img src="<?php echo $photo; ?>" class="img img-responsive img-circle" style="" alt="User Photo">
+                <div class="topInfoTitle">
+                    <?php echo $title; ?>
+                </div>
+            </a>
+            <span id="blockUserTop">
+                <?php echo User::getblockUserButton($video['users_id']); ?>
+            </span>
+        </div>
+    <?php
+    }
+    ?>
+    <?php
+    include $global['systemRootPath'] . 'view/include/video.min.js.php';
+    ?>
+    <?php
+    echo AVideoPlugin::afterVideoJS();
+    $jsFiles = [];
+    $jsFiles[] = "view/js/BootstrapMenu.min.js";
+    $jsFiles[] = "node_modules/sweetalert/dist/sweetalert.min.js";
+    //$jsFiles[] = "view/js/bootgrid/jquery.bootgrid.js";
+    //$jsFiles[] = "view/bootstrap/bootstrapSelectPicker/js/bootstrap-select.min.js";
+    $jsFiles[] = "view/js/addView.js";
+    //$jsFiles[] = "view/css/flagstrap/js/jquery.flagstrap.min.js";
+    $jsFiles[] = "node_modules/jquery-lazy/jquery.lazy.min.js";
+    $jsFiles[] = "node_modules/jquery-lazy/jquery.lazy.plugins.min.js";
+    $jsFiles[] = "node_modules/jquery-toast-plugin/dist/jquery.toast.min.js";
+    $jsFiles[] = "plugin/PlayerSkins/shareButton.js";
+
+
+    ?>
+    <?php
+    include $global['systemRootPath'] . 'view/include/bootstrap.js.php';
+    ?>
+    <?php
+    //echo combineFilesHTML($jsFiles, "js");
+    foreach ($jsFiles as $key => $value) {
+        echo getTagIfExists($value);
+    }
+    include $global['systemRootPath'] . 'view/include/moment.js.php';
+    echo AVideoPlugin::getFooterCode();
+    include $global['systemRootPath'] . 'plugin/PlayerSkins/contextMenu.php';
+    ?>
+    <script src="<?php echo getURL('node_modules/jquery-ui-dist/jquery-ui.min.js'); ?>" type="text/javascript"></script>
+    <script>
+        var topInfoTimeout;
+
+        $(document).ready(function() {
+            // Dynamic JavaScript generated by EmbedPlayerConfig
+            <?php echo $embedConfig->getCustomJS(); ?>
+
+            // Handle iframe mouse out behavior
+            $("iframe").mouseout(function(e) {
+                topInfoTimeout = setTimeout(function() {
+                    $('#mainVideo').removeClass("vjs-user-active");
+                }, 500);
+            });
+
+            <?php if (!$embedConfig->isEmbedTopInfoDisabled()) { ?>
+                // Add top info overlay to player
+                player.ready(function() {
+                    var clonedElement = $('#topInfoTemplate').clone();
+                    clonedElement.css('display', '');
+                    clonedElement.attr('id', 'topInfo');
+                    $(player.el()).append(clonedElement);
+                });
+            <?php } ?>
+        });
+    </script>
+    <?php
+    showCloseButton();
+    $obj = AVideoPlugin::getObjectDataIfEnabled('PlayerSkins');
+    if ($obj->showShareSocial && CustomizeUser::canShareVideosFromVideo(@$video['id'])) {
+        $social = getSocialModal(@$video['id'], @$url, @$title);
+        PlayerSkins::getStartPlayerJS(file_get_contents("{$global['systemRootPath']}plugin/PlayerSkins/shareButton.js"));
+        $js = $social['html'];
+        $js .= "<script>function togglePlayerSocial(){showSharing{$social['id']}();}</script>";
+        echo $js;
+    }else{
+        if(!$obj->showShareSocial){
+            echo '<!-- (togglePlayerSocial) PlayerSkins->showShareSocial is disabled -->';
+        }
+        if(!CustomizeUser::canShareVideosFromVideo(@$video['id'])){
+            echo '<!-- (togglePlayerSocial) CustomizeUser->canShareVideosFromVideo is false ['.(@$video['id']).'] -->';
+        }
+    }
+
+    ?>
+</body>
+
+</html>
+
+<?php
+include $global['systemRootPath'] . 'objects/include_end.php';
+?>

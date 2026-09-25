@@ -1,0 +1,12 @@
+# File: Dockerfile.mariadb
+
+FROM mariadb:latest
+
+# Set correct permissions for /tmp directory
+RUN chmod 1777 /tmp
+
+RUN chown -R mysql:mysql /var/lib/mysql
+RUN chmod -R 755 /var/lib/mysql
+
+# Copy custom MySQL configuration file
+COPY deploy/my.cnf /etc/mysql/my.cnf

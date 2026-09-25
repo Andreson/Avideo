@@ -1,0 +1,662 @@
+/* if it is IE */
+@media all and (-ms-high-contrast:none) {
+    nav ul.items-container li:first-child {
+        display: block;
+        flex: 0 1 auto;
+        /* Default */
+    }
+}
+
+
+#sidebar {
+    display: none;
+    width: 100px;
+    position: absolute;
+    top: 0;
+    height: 100vh;
+    margin-top: 50px;
+    -webkit-transition: all 0.25s ease-in-out;
+    -moz-transition: all 0.25s ease-in-out;
+    transition: all 0.25s ease-in-out;
+}
+
+/* Layout restoration is static. Motion is enabled only by a menu interaction. */
+body.sidebarLayout,
+body.sidebarLayout #sidebar,
+body.sidebarLayout #sideBarContainer {
+    transition: none;
+    animation: none;
+}
+
+body.sidebarLayout.sidebarAnimating {
+    transition: margin-left 0.2s ease-out;
+}
+
+body.sidebarLayout.sidebarAnimating #sidebar {
+    transition: width 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.sidebarLayout.sidebarAnimating,
+    body.sidebarLayout.sidebarAnimating #sidebar {
+        transition: none;
+    }
+}
+
+#menuBackButton,
+.compressMenu{
+    display: none;
+}
+
+body.youtube .compressMenu,
+body.pwa #menuBackButton{
+    display: inline-block;
+}
+
+body.youtube #buttonMenu{
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#buttonMenu{
+    border-radius: 4px;
+    margin: 0;
+}
+
+body.pwa #buttonMenu{
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+body.youtube .compressMenu .compress{
+    display: inline-block;
+}
+body.youtube .compressMenu .expand{
+    display: none;
+}
+
+body.youtube.compressedMenu .compressMenu .expand{
+    display: inline-block;
+}
+body.youtube.compressedMenu .compressMenu .compress{
+    display: none;
+}
+
+body.youtube #sidebar {
+    display: block;
+    width: 300px;
+}
+body.youtube.compressedMenu #sidebar {
+    width: 100px;
+}
+
+body.youtube.compressedMenu #sidebar .menuLabel,
+body.youtube.compressedMenu #sidebar .hideIfCompressed,
+body.youtube.compressedMenu #sidebar hr {
+    display: none;
+}
+
+body.youtube.compressedMenu #leftMenuUser {
+    padding-left: 5px;
+}
+
+#leftMenuUser{
+    min-height: 60px; margin: 5px 0;
+}
+
+#leftMenuUser .leftMenuUserImg {
+    margin-left: 10px;
+}
+
+#leftMenuUser .menuLabel {
+    margin-left: 80px;
+}
+
+body.youtube.compressedMenu #leftMenuUser .leftMenuUserImg{
+    margin-left: 0;
+}
+
+#sideBarContainer {
+	position: absolute;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	padding: 10px;
+	padding-right: 12px;
+	overflow-y: scroll;
+	mask-image: linear-gradient(to top, transparent, black),
+	linear-gradient(to left, transparent 17px, black 17px);
+	mask-size: 100% 20000px;
+	mask-position: left bottom;
+	-webkit-mask-image: linear-gradient(to top, transparent, black),
+	linear-gradient(to left, transparent 17px, black 17px);
+	-webkit-mask-size: 100% 20000px;
+	-webkit-mask-position: left bottom;
+	transition: mask-position 0.3s, -webkit-mask-position 0.3s;
+}
+#sideBarContainer:hover {
+	-webkit-mask-position: left top;
+}
+#sideBarContainer {
+  /* Non-Standard, But More Styling-Capable Properties */
+	&::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: gray;
+		border-radius: 8px;
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	/* Standardized Properties */
+	@supports not selector(::-webkit-scrollbar) {
+		scrollbar-color: gray transparent;
+		scrollbar-width: thin;
+	}
+}
+
+/*
+#sideBarContainer {
+    overflow: hidden;
+}
+#sideBarContainer:hover {
+    overflow: auto;
+    padding-right: 0;
+}
+*/
+
+#sideBarContainer ul {
+    margin-bottom: 150px;
+}
+
+#sideBarContainer>ul>li>strong, .singleLineMenu {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.youtube.compressedMenu #sideBarContainer li a{
+    text-align: center;
+}
+
+#buttonMyNavbar {
+    display: none;
+}
+
+/* Hints must never intercept clicks on neighboring actions or dropdown items. */
+.navbarTooltip { pointer-events: none; }
+
+#mysearch.in,
+#mysearch.collapsing {
+    display: block !important;
+}
+
+#myNavbar {
+    display: block;
+}
+
+#myNavbar.in,
+#myNavbar.collapsing {
+    display: block !important;
+}
+
+#searchForm {
+    width: 100%;
+    margin: 0 5px;
+    white-space: nowrap;
+}
+
+#searchForm>span.input-group-prepend>button {
+
+    border-right-width: 0;
+}
+
+#searchForm>span.input-group-append>button {
+
+    border-left-width: 0;
+}
+
+#searchForm input[name="search"] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right-width: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-width: 0;
+    float: unset;
+    margin-left: -5px;
+    margin-right: -5px;
+}
+
+#filterDropdown.show .dropdown-menu {
+    display: block;
+}
+
+#rightProfileButton {
+    padding: 0;
+    margin: 5px;
+    border: 0;
+    background: none;
+    background-color: transparent;
+}
+
+#rightLoginButton {
+    margin-left: 5px;
+    margin-right: 40px;
+}
+
+#navbarRegularButtons {
+    max-width: 70%;
+    /* remove the scroll because the dropsown menus does not work */
+    /*overflow-x: auto;*/
+    /*overflow-y: hidden;*/
+}
+
+#navbarRegularButtons span.hidden-mdx {
+    max-width: 15vw;
+    display: inline-block;
+}
+
+#navbarRegularButtons .btn {
+    overflow: hidden;
+}
+
+#navbarRegularButtons::-webkit-scrollbar {
+    height: 4px;
+}
+
+#lastItemOnMenu {
+    padding-right: 40px;
+}
+
+#mysearch {
+    height: auto !important;
+}
+
+#searchNavItem,
+#lastItemOnMenu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#lastItemOnMenu ul {
+    padding: 0;
+}
+
+@media (max-width : 767px) {
+    #filterDropdown {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+    }
+
+    #searchForm {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        /* center horizontally */
+        align-items: center;
+        /* center vertically */
+        padding: 0 5px;
+    }
+
+    #rightLoginButton,
+    #rightProfileButton {
+        margin-right: 5px;
+        margin-left: 0;
+    }
+
+    #searchForm>div {
+        width: 100%;
+    }
+
+    .mobilesecondnav {
+        position: absolute;
+        left: 40%;
+        right: 5px;
+    }
+
+    #buttonMyNavbar,
+    #searchNavItem {
+        display: block;
+    }
+
+    #mysearch {
+        width: 100%;
+        display: none;
+        position: absolute;
+        right: 0;
+        left: 0;
+        padding-left: 0px;
+        padding-right: 0px;
+        background-color: #FFF;
+
+    }
+
+    #searchFormInput {
+        flex-grow: 1;
+        min-width: 75vw;
+    }
+
+    #myNavbar {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 50px;
+        background-color: #FFF;
+        padding: 4px;
+        width: 50%;
+    }
+
+    #mainNavBar .navbar-brand {
+        width: 100% !important;
+        text-align: center;
+    }
+
+    #mainNavBar .navbar-brand>img {
+        display: unset;
+    }
+
+    #myNavbar ul.right-menus {
+        display: block;
+    }
+
+    #myNavbar ul.right-menus li {
+        margin: 0;
+        padding: 0;
+    }
+
+    #myNavbar ul.right-menus .btn,
+    #myNavbar ul.right-menus .btn-group {
+        margin: 2px;
+        width: 100%;
+    }
+
+    #myNavbar ul.right-menus .btn-group {
+        margin: 0;
+    }
+
+    nav ul.items-container li:first-child {
+        display: list-item;
+    }
+
+    #navbarRegularButtons span.hidden-mdx {
+        max-width: 100vw;
+    }
+
+    .searchli {
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+
+    }
+
+    .navbar-toggle {
+        margin-right: 5px !important;
+
+
+    }
+
+    #navbarRegularButtons,
+    #lastItemOnMenu,
+    .left-side {
+        padding: 0 5px;
+    }
+
+    .searchul {
+        padding-left: 0px;
+    }
+}
+
+li.navsub-toggle .badge {
+    float: right;
+}
+
+li.navsub-toggle a+ul {
+    padding-left: 15px;
+}
+
+.navbar-lang-btn .select2-container {
+    margin: 8px 0;
+}
+
+.navbar-lang-btn .select2-selection {
+    border-color: #00000077 !important;
+}
+
+#searchForm #buttonSearch .loadingIcon,
+#searchForm #buttonSearch .notFoundIcon,
+#searchForm.emptyResponse #buttonSearch .notLoadingIcon{
+    display: none;
+}
+
+#searchForm.isLoading #buttonSearch .loadingIcon,
+#searchForm.emptyResponse #buttonSearch .notFoundIcon{
+    display: inline-block;
+}
+#searchForm.isLoading #buttonSearch .notLoadingIcon{
+    display: none;
+}
+
+@media screen and (min-width: 992px) {
+
+    body.youtube {
+        margin-left: 300px;
+    }
+
+    body.youtube div.container-fluid .col-sm-10.col-sm-offset-1.list-group-item {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+    }
+
+    body.youtube.compressedMenu {
+        margin-left: 100px;
+    }
+}
+
+/* Scroll only the configurable actions; navigation and account remain reachable. */
+#mainNavBar > .items-container { align-items: center; justify-content: space-between; }
+#mainNavBar > .items-container > li:first-child { flex: 0 0 auto; }
+#mainNavBar .left-side { padding-left: 8px; margin-bottom: 0; }
+#mainNavBar .left-side > li:first-child { flex: 0 0 auto; }
+#mainNavBar #searchNavItem { flex: 0 1 280px; min-width: 100px; }
+#mainNavBar #searchNavItem > .navbar-header { width: 100%; }
+#mainNavBar #searchForm { display: flex; align-items: center; width: auto; }
+#mainNavBar #searchFormInput { width: 100%; min-width: 0; flex: 1 1 auto; }
+#mainNavBar #lastItemOnMenu { flex: 0 1 auto; min-width: 0; padding-right: 8px; }
+#mainNavBar #myNavbar {
+    display: block !important; /* Override the legacy mobile collapse and its inline hide. */
+    position: static;
+    float: none !important;
+    min-width: 0;
+    width: auto;
+    padding: 0;
+    background: transparent;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+#mainNavBar #myNavbar > ul.right-menus {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: max-content;
+    margin: 0;
+}
+#mainNavBar #myNavbar > ul.right-menus > li { flex: 0 0 auto; }
+#mainNavBar #myNavbar > ul.right-menus > li > .btn,
+#mainNavBar #myNavbar > ul.right-menus > li > .btn-group { width: auto; }
+#mainNavBar #buttonMyNavbar { display: none; }
+#mainNavBar #rightProfileButton,
+#mainNavBar .navbarScrollArrow { flex: 0 0 auto; }
+#mainNavBar .navbarScrollArrow { padding: 6px; margin: 0 2px; border-radius: 50%; }
+#mainNavBar .navbarScrollArrow[hidden] { display: none; }
+#mainNavBar #myNavbar .navbarScrollDropdown {
+    position: fixed;
+    margin: 0;
+    z-index: 1040;
+}
+#mainNavBar #myNavbar .dropdown-menu.navbarScrollDropdown { overflow-y: auto; }
+@media (max-width: 767px) {
+    #mainNavBar #searchNavItem { flex: 0 0 42px; min-width: 0; }
+    #mainNavBar #mysearch {
+        position: absolute;
+        top: 100%;
+        left: 8px;
+        right: 8px;
+        width: auto;
+        padding: 12px;
+        background: var(--navbar-menu-background, Canvas);
+        border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, .16);
+    }
+    #mainNavBar #searchForm {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+    }
+    #mainNavBar #searchForm > .input-group-prepend,
+    #mainNavBar #searchForm > .input-group-append { flex: 0 0 44px; }
+    #mainNavBar #searchForm > #filterDropdown { flex: 0 0 0; width: 0; min-width: 0; }
+    #mainNavBar #searchForm > span > .btn {
+        width: 44px;
+        height: 44px;
+        margin: 0;
+        padding: 10px;
+        font-size: 16px;
+    }
+    #mainNavBar #searchFormInput {
+        height: 44px;
+        min-width: 0;
+        margin: 0;
+        padding: 10px 12px;
+        font-size: 16px;
+    }
+    #mainNavBar #lastItemOnMenu { flex: 0 0 auto; }
+    #mainNavBar #buttonMyNavbar { display: inline-block !important; }
+    #mainNavBar .navbarScrollArrow { display: none !important; }
+    #mainNavBar #myNavbar {
+        display: none !important;
+        position: fixed;
+        top: var(--navbar-menu-top, 50px);
+        right: 8px;
+        width: min(360px, calc(100% - 16px));
+        max-height: calc(100dvh - var(--navbar-menu-top, 50px) - 16px);
+        padding: 12px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background: var(--navbar-menu-background, Canvas);
+        border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, .2);
+        overscroll-behavior: contain;
+    }
+    #mainNavBar #myNavbar.mobile-navbar-open { display: block !important; }
+    #mainNavBar #myNavbar > ul.right-menus {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: minmax(64px, auto);
+        align-items: stretch;
+        width: 100%;
+        gap: 8px;
+    }
+    #mainNavBar #myNavbar > ul.right-menus > li {
+        min-width: 0;
+        margin: 0;
+    }
+    /* Plugins wrap actions differently; stretch wrappers, but never popup contents. */
+    #mainNavBar #myNavbar > ul.right-menus > li > div:not(.dropdown-menu),
+    #mainNavBar #myNavbar > ul.right-menus > li > div > .btn-group {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+    #mainNavBar #myNavbar > ul.right-menus > li .btn:not(.dropdown-menu .btn) {
+        width: 100%;
+        height: 100%;
+        min-height: 64px;
+        margin: 0;
+        padding: 10px 8px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.4;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        text-align: center;
+    }
+    #mainNavBar #myNavbar > ul.right-menus > li .btn:not(.dropdown-menu .btn):not(.hideWhenHasNothingToShow) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    #mainNavBar #mainNavbarLogo { max-width: 95px; padding-left: 5px; padding-right: 5px; }
+    #mainNavBar #mainNavbarLogo img { max-width: 100%; object-fit: contain; }
+}
+@media (max-width: 400px) {
+    #mainNavBar #mainNavbarLogo { max-width: 60px; }
+    #mainNavBar .navbarScrollArrow { padding: 6px 3px; margin: 0; }
+}
+
+/* Search filters are anchored to the search button and retain theme panel colors. */
+#filterDropdown { position: static; }
+#filterDropdown > .searchFilterPanel {
+    position: fixed;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    white-space: normal;
+    z-index: 1040;
+}
+#filterDropdown.show > .searchFilterPanel { display: flex; flex-direction: column; }
+.searchFilterPanel > .panel-heading,
+.searchFilterPanel > .panel-footer { flex: 0 0 auto; }
+.searchFilterHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.filterTabs { display: flex; flex-wrap: wrap; gap: 6px; }
+#mainNavBar .filterTabs > li { display: block; flex: 1 1 auto; margin: 0; }
+.filterTabs > li > a { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; margin: 0; border-radius: 9px; text-align: center; white-space: normal; }
+.filterTabs > li > a > i { flex: 0 0 auto; }
+.filterTabCount[hidden] { display: none; }
+.filterTabs > li > a:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+.searchFilterBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px; }
+.searchFilterPanel .searchHTML { border: 0; box-shadow: none; background: transparent; }
+.searchFilterPanel .searchHTML > .panel-heading { padding: 0 0 10px; border: 0; background: transparent; }
+.searchFilterPanel .searchHTML > .panel-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 8px; padding: 0; }
+.searchFilterPanel .searchHTML > .panel-body::before,
+.searchFilterPanel .searchHTML > .panel-body::after { display: none; }
+.searchFilterPanel .form-check { min-width: 0; }
+#filterDropdown .form-control { width: 100%; border-radius: 8px; }
+.searchFilterPanel .form-check-label { display: flex; align-items: baseline; gap: 8px; width: 100%; height: 100%; padding: 12px; margin: 0; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 8px; font-weight: 400; overflow-wrap: anywhere; cursor: pointer; }
+.searchFilterPanel .form-check-input { flex: 0 0 auto; margin: 0; }
+.searchFilterPanel .form-check-label:has(:checked) { border-color: currentColor; background: color-mix(in srgb, currentColor 8%, transparent); font-weight: 600; }
+.searchFilterPanel .form-check-label:hover { background: color-mix(in srgb, currentColor 6%, transparent); }
+.searchFilterPanel .form-check-label:focus-within { outline: 2px solid currentColor; outline-offset: -2px; }
+.searchFilterFooter { display: flex; justify-content: flex-end; }
+.searchFilterFooter .btn { border-radius: 8px; min-width: 120px; }
+
+/* Shared topbar action menus. Panels retain their own content layouts. */
+#mainNavBar :is(.actionMenu, .items-container .dropdown-menu:where(:not(.panel, .notificationMenu))) { width: 320px; min-width: 0; max-width: calc(100vw - 16px); padding: 8px; border-radius: 14px; }
+#mainNavBar :is(.actionMenu, .items-container .dropdown-menu:where(:not(.panel, .notificationMenu))) > .dropdown-header { padding: 8px 10px 12px; white-space: normal; font-size: 14px; font-weight: 600; color: inherit; }
+#mainNavBar :is(.actionMenu, .items-container .dropdown-menu:where(:not(.panel, .notificationMenu))) > li > a,
+#mainNavBar :is(.actionMenu, .items-container .dropdown-menu:where(:not(.panel, .notificationMenu))) > li > button { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 9px; white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
+#mainNavBar :is(.actionMenu, .items-container .dropdown-menu:where(:not(.panel, .notificationMenu))) > li > :is(a, button) > :is(i, svg, .fa, .fas, .far, .fa-solid, .fa-regular) { flex: 0 0 24px; width: 24px; text-align: center; font-size: 18px; }
+#mainNavBar :is(.actionMenu, .items-container .dropdown-menu:where(:not(.panel, .notificationMenu))) > li > a:focus-visible,
+#mainNavBar :is(.actionMenu, .items-container .dropdown-menu:where(:not(.panel, .notificationMenu))) > li > button:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+
+#mainNavBar .items-container .dropdown-menu { border-radius: 14px; }
+#mainNavBar .items-container .dropdown-menu > li { flex: none; display: block; }
+#mainNavBar .items-container .dropdown-menu > .divider { margin: 6px 4px; }
+#mainNavBar .items-container .dropdown-menu-arrow::before,
+#mainNavBar .items-container .dropdown-menu-arrow::after { display: none; }
+
+#mainNavBar .items-container .dropdown-menu > li > button { width: 100%; text-align: left; }

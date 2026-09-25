@@ -1,0 +1,168 @@
+<?php
+/**
+ * PHPUnit Bootstrap File
+ *
+ * This file sets up the testing environment and loads necessary dependencies.
+ * It's automatically loaded before running tests (configured in phpunit.xml).
+ */
+
+// Define the base path for the application
+define('TEST_ROOT', __DIR__);
+define('APP_ROOT', dirname(__DIR__));
+
+// Load Composer's autoloader
+require_once APP_ROOT . '/vendor/autoload.php';
+
+// Initialize error reporting for tests
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
+// Mock configuration if needed
+if (!defined('TESTING')) {
+    define('TESTING', true);
+}
+
+// Mock the _error_log function
+if (!function_exists('_error_log')) {
+    function _error_log($message, $file = '', $line = '') {
+        // Do nothing in tests - just prevent errors
+        return true;
+    }
+}
+
+// Global tracker for plugin calls
+global $pluginCallTracker;
+$pluginCallTracker = [];
+
+// Mock the Video class if not loaded
+if (!class_exists('Video')) {
+    class Video {
+        public static $simulateMissing = false;
+        public static $simulateSaveFailure = false;
+
+        private $status = '';
+
+        public function __construct($title = '', $filename = '', $id = 0) {}
+        public function setDuration($duration) { return true; }
+        public function setStatus($status) {
+            $this->status = $status;
+            return true;
+        }
+        public function setVideoDownloadedLink($link) { return true; }
+        public function setMainVideoResolution($resolution) { return true; }
+        public function save() { return !self::$simulateSaveFailure; }
+        public function getCleanTitle() { return 'Test Video'; }
+        public function getVideos_id() { return 1; }
+        public function getUsers_id() { return self::$simulateMissing ? 0 : 1; }
+    }
+}
+
+// Mock AVideoPlugin with tracking support
+if (!class_exists('AVideoPlugin')) {
+    class AVideoPlugin {
+        public static function onNewVideo($id) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'onNewVideo', 'id' => $id];
+            return true;
+        }
+
+        public static function afterNewVideo($id) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'afterNewVideo', 'id' => $id];
+            return true;
+        }
+
+        public static function onUpdateVideo($id) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'onUpdateVideo', 'id' => $id];
+            return true;
+        }
+
+        public static function onVideoSetStatus($id, $oldValue, $newValue) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'onVideoSetStatus', 'id' => $id, 'oldValue' => $oldValue, 'newValue' => $newValue];
+            return true;
+        }
+
+        public static function onEncoderNotifyIsDone($id) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'onEncoderNotifyIsDone', 'id' => $id];
+            return true;
+        }
+
+        public static function onEncoderReceiveImage($id) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'onEncoderReceiveImage', 'id' => $id];
+            return true;
+        }
+
+        public static function onReceiveFile($id) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'onReceiveFile', 'id' => $id];
+            return true;
+        }
+
+        public static function onUploadIsDone($id) {
+            global $pluginCallTracker;
+            $pluginCallTracker[] = ['method' => 'onUploadIsDone', 'id' => $id];
+            return true;
+        }
+    }
+}
+
+/**
+ * Helper function to create mock configuration
+ * Prevents tests from loading actual database configuration
+ */
+function mockConfiguration() {
+    global $global, $config;
+
+    if (!isset($global)) {
+        $global = [
+            'mysqli' => null,
+            'debug' => false,
+        ];
+    }
+
+    if (!isset($config)) {
+        $config = new stdClass();
+        $config->databaseHost = 'localhost';
+        $config->databaseUser = 'test';
+        $config->databasePass = 'test';
+        $config->databaseName = 'test_db';
+    }
+}
+
+// Setup mock configuration
+mockConfiguration();
+
+// Stub for cleanString() - pure transliteration helper in objects/functions.php.
+// The real implementation has no external dependencies but requires loading the
+// entire functions.php chain (DB, config, …). This stub satisfies the interface
+// contract used in unit/security tests: it accepts a string and returns a string.
+if (!function_exists('cleanString')) {
+    function cleanString($text)
+    {
+        if (empty($text)) {
+            return '';
+        }
+        if (!is_string($text)) {
+            return $text;
+        }
+        // Remove non-printable / non-ASCII characters and known special chars
+        $text = preg_replace('/[^\x20-\x7E]/u', '', $text);
+        // Strip characters that are not alphanumeric, spaces, hyphens or dots
+        $text = preg_replace('/[^\w\s.\-]/u', '', $text);
+        return trim($text);
+    }
+}
+
+// Stub for isCommandLineInterface() - mirrors objects/functions.php's real implementation
+// (empty($_GET['ignoreCommandLineInterface']) && php_sapi_name() === 'cli') so tests can
+// exercise CLI-guarded code paths by setting $_GET['ignoreCommandLineInterface'] = 1.
+if (!function_exists('isCommandLineInterface')) {
+    function isCommandLineInterface()
+    {
+        return (empty($_GET['ignoreCommandLineInterface']) && php_sapi_name() === 'cli');
+    }
+}

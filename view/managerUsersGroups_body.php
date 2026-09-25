@@ -1,0 +1,275 @@
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" id="addUserGroupsBtn">
+                    <i class="fa-solid fa-plus"></i></span> <?php echo __("New User Groups"); ?>
+                </button>
+                <a href="<?php echo $global['webSiteRootURL']; ?>mvideos" class="btn btn-success">
+                    <span class="fa fa-film" aria-hidden="true"></span> <?php echo __("Videos"); ?>
+                </a>
+                <a href="<?php echo $global['webSiteRootURL']; ?>users" class="btn btn-primary">
+                    <span class="fa fa-user" aria-hidden="true"></span> <?php echo __("Users"); ?>
+                </a>
+                <a href="#" class="btn btn-info pull-right" data-toggle="popover" title="<?php echo __("What is User Groups"); ?>" data-placement="bottom" data-content="<?php echo __("This is where you can create groups and associate them with your videos and users. This will make your videos private. Only users who are in the same group as the videos can view them"); ?>"><span class="fa fa-question-circle" aria-hidden="true"></span> <?php echo __("What is User Groups"); ?></a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <table id="grid" class="table table-condensed table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th data-column-id="group_name" data-order="asc"><?php echo __("Name"); ?></th>
+                        <th data-column-id="created" data-width="150px"><?php echo __("Created"); ?></th>
+                        <th data-column-id="modified" data-width="150px"><?php echo __("Modified"); ?></th>
+                        <th data-column-id="commands" data-formatter="commands" data-sortable="false" data-width="100px"></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div id="groupFormModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title"><?php echo __("User Groups Form"); ?></h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-compact" id="updateUserGroupsForm" onsubmit="">
+                        <input type="hidden" id="inputUserGroupsId" name="id">
+                        <label for="inputName" class="sr-only"><?php echo __("Name"); ?></label>
+                        <input type="text" id="inputName" name="group_name" class="form-control" placeholder="<?php echo __("Name"); ?>" required autofocus>
+
+                        <?php
+                        if (User::isAdmin()) {
+                            $objCustomizeUser = AVideoPlugin::getObjectDataIfEnabled('CustomizeUser');
+                            if (!empty($objCustomizeUser) && !empty($objCustomizeUser->enableResolutionsByUserGroup)) {
+                        ?>
+                            <hr>
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <?php echo __("Allowed Resolutions"); ?>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <label><?php echo __("Select the resolutions allowed for this group"); ?>:</label>
+                                        <br><small class="text-muted"><?php echo __("If none selected, all resolutions will be available"); ?></small>
+                                        <div class="clearfix"></div>
+                                        <div id="resolutionsCheckboxes" class="row">
+                                            <?php
+                                            $availableResolutions = [240, 360, 480, 540, 720, 1080, 1440, 2160];
+                                            foreach ($availableResolutions as $resolution) {
+                                            ?>
+                                                <div class="checkbox col-md-3" style="margin-top: 10px;">
+                                                    <label>
+                                                        <input type="checkbox" name="allowed_resolutions[]" value="<?php echo $resolution; ?>" class="resolution-checkbox">
+                                                        <?php echo $resolution; ?>p
+                                                    </label>
+                                                </div>
+                                            <?php
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                            }
+                        ?>
+                            <hr>
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <?php echo __("Group Permissions"); ?>
+                                </div>
+                                <div class="panel-body">
+                                    <?php
+                                    echo Permissions::getForm(); ?>
+                                </div>
+                            </div>
+                        <?php
+                        }
+                        ?>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __("Close"); ?></button>
+                    <button type="button" class="btn btn-primary" id="saveUserGroupsBtn"><?php echo __("Save changes"); ?></button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div><!--/.container-->
+<div id="pluginsPermissionModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div id="pluginsPermissionModalContent">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function pluginPermissionsBtn(plugins_id) {
+        modal.showPleaseWait();
+        $('#groupFormModal').modal('hide');
+        $("#pluginsPermissionModalContent").html('');
+        $.ajax({
+            url: webSiteRootURL + 'plugin/Permissions/getPermissionsFromPlugin.html.php?plugins_id=' + plugins_id,
+            success: function(response) {
+                modal.hidePleaseWait();
+                $("#pluginsPermissionModalContent").html(response);
+                $('#pluginsPermissionModal').modal();
+            }
+        });
+    }
+    $(document).ready(function() {
+        var userGroupsFormatters = {
+            "commands": function(row) {
+                var editBtn = '<button type="button" class="btn btn-xs btn-default command-edit" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="' + __('Edit') + '"><i class="fa-solid fa-pen-to-square"></i></button>'
+                var deleteBtn = '<button type="button" class="btn btn-default btn-xs command-delete"  data-row-id="' + row.id + '  data-toggle="tooltip" data-placement="left" title="' + __('Delete') + '"><i class="fa fa-trash"></i></button>';
+                var channelsBtn = '<button type="button" class="btn btn-xs btn-default command-channels" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="' + __('View Channels') + '"><i class="fa fa-tv"></i></button>';
+                return editBtn + deleteBtn + channelsBtn;
+            }
+        };
+
+        var dt = avideoDataTable("#grid", {
+            avideoControls: true,
+            serverSide: true,
+            order: [[0, 'asc']],
+            language: {
+                zeroRecords: __("No results found!"),
+                loadingRecords: __("Loading..."),
+                search: __("Search"),
+            },
+            columns: [
+                { data: 'group_name' },
+                { data: 'created', width: '150px' },
+                { data: 'modified', width: '150px' },
+                { data: null, orderable: false, width: '100px', render: function(data, type, row) { return userGroupsFormatters.commands(row); } }
+            ],
+            ajax: avideoDataTableAjax({ url: webSiteRootURL + "objects/usersGroups.json.php" })
+        });
+
+        var grid = $("#grid");
+        grid.off('click.userGroupsMgr', '.command-edit').on('click.userGroupsMgr', '.command-edit', function(e) {
+            var row = dt.row($(this).closest('tr')).data();
+            console.log(row);
+
+            $('#inputUserGroupsId').val(row.id);
+            $('#inputName').val(row.group_name);
+
+            // Load resolutions
+            $('.resolution-checkbox').prop('checked', false);
+            if (row.allowed_resolutions) {
+                try {
+                    var allowedResolutions = JSON.parse(row.allowed_resolutions);
+                    if (Array.isArray(allowedResolutions)) {
+                        allowedResolutions.forEach(function(resolution) {
+                            $('.resolution-checkbox[value="' + resolution + '"]').prop('checked', true);
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error parsing allowed_resolutions:', e);
+                }
+            }
+
+            modal.showPleaseWait();
+            $.ajax({
+                url: webSiteRootURL + 'plugin/Permissions/getPermissions.json.php?users_groups_id=' + row.id,
+                success: function(response) {
+                    console.log(response);
+                    $(".permissions").prop("checked", false);
+                    for (var key in response) {
+                        if (typeof key !== 'string') {
+                            continue;
+                        }
+                        for (var subkey in response[key]) {
+                            if (typeof subkey !== 'string' || isNaN(subkey)) {
+                                continue;
+                            }
+                            var selector = "." + key + "[value=\"" + response[key][subkey] + "\"]";
+                            console.log(selector, $(selector));
+                            $(selector).prop("checked", true);
+                        }
+                    }
+                    $('#groupFormModal').modal();
+                    modal.hidePleaseWait();
+                }
+            });
+
+        });
+        grid.off('click.userGroupsMgr', '.command-delete').on('click.userGroupsMgr', '.command-delete', function(e) {
+            var row = dt.row($(this).closest('tr')).data();
+
+            swal({
+                    title: __("Are you sure?"),
+                    text: __("You will not be able to recover this action!"),
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then(function(willDelete) {
+                    if (willDelete) {
+                        modal.showPleaseWait();
+                        $.ajax({
+                            url: webSiteRootURL + 'objects/userGroupsDelete.json.php',
+                            data: {
+                                "id": row.id
+                            },
+                            type: 'post',
+                            success: function(response) {
+                                if (response.status === "1") {
+                                    dt.ajax.reload(null, false);
+                                    avideoAlertSuccess(__("Your group has been deleted!"));
+                                } else {
+                                    avideoAlertError(__("Your group has NOT been deleted!"));
+                                }
+                                modal.hidePleaseWait();
+                            }
+                        });
+                    }
+                });
+        });
+        grid.off('click.userGroupsMgr', '.command-channels').on('click.userGroupsMgr', '.command-channels', function(e) {
+            var row = dt.row($(this).closest('tr')).data();
+            var channelName = row.group_name ? encodeURIComponent(row.group_name) : '';
+            window.open(webSiteRootURL + 'channels/' + row.id + '/' + channelName, '_blank');
+        });
+
+        $('#addUserGroupsBtn').click(function(evt) {
+            $('#inputUserGroupsId').val('');
+            $('#inputName').val('');
+            $('#inputCleanName').val('');
+            $("#updateUserGroupsForm").trigger("reset");
+            $(".permissions").prop("checked", false);
+            $('.resolution-checkbox').prop('checked', false);
+            $('#groupFormModal').modal();
+        });
+
+        $('#saveUserGroupsBtn').click(function(evt) {
+            $('#updateUserGroupsForm').submit();
+        });
+
+        $('#updateUserGroupsForm').submit(function(evt) {
+            evt.preventDefault();
+            modal.showPleaseWait();
+            $.ajax({
+                url: webSiteRootURL + "objects/userGroupsAddNew.json.php",
+                data: $(this).serialize(),
+                type: 'post',
+                success: function(response) {
+                    if (response.status) {
+                        $('#groupFormModal').modal('hide');
+                        dt.ajax.reload(null, false);
+                        avideoAlertSuccess(__("Your group has been saved!"));
+                    } else {
+                        avideoAlertError(__("Your group has NOT been saved!"));
+                    }
+                    modal.hidePleaseWait();
+                }
+            });
+            return false;
+        });
+    });
+</script>

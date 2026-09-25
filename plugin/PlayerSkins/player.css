@@ -1,0 +1,115 @@
+@media all and (max-width: 767px) {
+    .vjs-paused #seekBG {
+        background-size: contain;
+    }
+}
+
+@media (max-width: 1200px) {
+    .vjs-button:not(.player-logo) {
+        max-width: 30px;
+    }
+
+    .vjs-remaining-time,
+    player-logo {
+        display: none !important;
+    }
+}
+
+#avideo-audio-progress {
+    background-color: #00000099;
+    height: 100%;
+    width: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0;
+    transition: width .1s;
+    border-right: solid 2px #FF000099;
+}
+
+.vjs-audio .vjs-poster {
+    opacity: 0.8;
+}
+
+.img-portrait {
+    transform: scale(0.56) rotate(90deg);
+}
+
+.embed-responsive-9by16 {
+    padding-bottom: 100%;
+}
+
+.video-js.vjs-9-16 {
+    padding-top: 100%;
+}
+
+.vjs-rotate90 {
+    rotate: 90;
+    zoom: 1.0;
+}
+
+.vjs-thumbnail-holder {
+    margin-bottom: 10px;
+}
+
+.vjs-menu-button > .vjs-menu {
+    position: absolute;
+    right: 0;
+    transform: translateX(-30%);
+}
+
+body.vjs-full-window {
+    overflow: hidden !important;
+}
+
+body.vjs-full-window #mainNavBar,
+body.vjs-full-window .navbar-fixed-top,
+body.vjs-full-window .fixed-top {
+    display: none !important;
+}
+
+.vjs-full-window .video-js.vjs-fullscreen {
+    z-index: 2147483647 !important;
+}
+
+@media all and (min-width: 900px) {
+    .vjs-has-started.vjs-paused .vjs-big-play-button {
+        display: none !important;
+    }
+}
+
+.vjs-has-started.vjs-paused.showBigButton .vjs-big-play-button {
+    display: block !important;
+}
+
+@media all and (max-width: 900px) {
+    div.vjs-control-bar {
+        font-size: 0.9em !important;
+    }
+
+    #mainVideo>div.vjs-control-bar>div.vjs-menu-button.vjs-menu-button-popup.vjs-control.vjs-button>div>ul {
+        font-size: 1.2em !important;
+    }
+
+    #mainVideo>div.vjs-control-bar>div.vjs-menu-button.vjs-menu-button-popup.vjs-control.vjs-button>div>ul li {
+        padding: 6px 1px !important;
+    }
+}
+
+@media all and (max-width: 800px) {
+    div.vjs-control-bar {
+        font-size: 0.85em !important;
+    }
+}
+
+@media all and (max-width: 700px) {
+    div.vjs-control-bar {
+        font-size: 0.8em !important;
+    }
+}
+
+@media all and (max-width: 600px) {
+    div.vjs-control-bar {
+        font-size: 0.7em !important;
+    }
+}

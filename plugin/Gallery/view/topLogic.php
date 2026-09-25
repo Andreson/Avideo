@@ -1,0 +1,84 @@
+<?php
+
+global $global, $config;
+if (!isset($global['systemRootPath'])) {
+    require_once '../videos/configuration.php';
+}
+require_once $global['systemRootPath'] . 'objects/user.php';
+require_once $global['systemRootPath'] . 'objects/functions.php';
+require_once $global['systemRootPath'] . 'plugin/Gallery/functions.php';
+require_once $global['systemRootPath'] . 'objects/subscribe.php';
+
+$siteTitle = [];
+
+$obj = AVideoPlugin::getObjectData("Gallery");
+if (!empty($_GET['type'])) {
+    if ($_GET['type'] == 'audio') {
+        $_SESSION['type'] = 'audio';
+    } else if ($_GET['type'] == 'video') {
+        $_SESSION['type'] = 'video';
+    } else {
+        unset($_SESSION['type']);
+    }
+}
+// read-only from here on (video/category queries + rendering); release the lock so
+// it doesn't block other concurrent requests from the same browser session
+_session_write_close();
+require_once $global['systemRootPath'] . 'objects/category.php';
+$currentCat;
+if (!empty($_REQUEST['catName'])) {
+    $currentCat = Category::getCategoryByName($_REQUEST['catName']);
+    if(!empty($currentCat)){
+        array_push($siteTitle, $currentCat['name']);
+    }
+}
+
+require_once $global['systemRootPath'] . 'objects/video.php';
+$orderString = '';
+if ($obj->sortReverseable) {
+    $orderString = strpos($_SERVER['REQUEST_URI'], '?') === false ? $_SERVER['REQUEST_URI'] . '/?' : $_SERVER['REQUEST_URI'] . '&';
+    $orderString = preg_replace('~(&|/)\1+~', '\1', $orderString);
+}
+// SECURITY REVIEW (2026-08-21): !hidePrivateVideos intentionally bypasses the group restriction
+// for this front-page listing (see Gallery.php hidePrivateVideos default) - not a bug, see there.
+$video = Video::getVideo("", Video::SORT_TYPE_VIEWABLE, !$obj->hidePrivateVideos, false, true);
+$debugLastGetVideoSQL = $lastGetVideoSQL;
+if (empty($video)) {
+    $video = Video::getVideo("", Video::SORT_TYPE_VIEWABLE, !$obj->hidePrivateVideos, true);
+    $debugLastGetVideoSQL = $lastGetVideoSQL;
+}
+$total = 0;
+$totalPages = 0;
+$url = '';
+$metaDescription = '';
+if (!empty($video)) {
+    if (strpos($_SERVER['REQUEST_URI'], '/cat/') === false) {
+        $url = $global['webSiteRootURL'] . 'page/';
+    } else {
+        $url = $global['webSiteRootURL'] . 'cat/' . $video['clean_category'] . '/page/';
+    }
+    global $contentSearchFound;
+    if (empty($contentSearchFound)) {
+        $contentSearchFound = !empty($videos);
+    }
+    //array_push($siteTitle, __("Home"));
+    // don't add a prefix for SEO, it's already handled here below by the implode() func
+    $seoComplement = getSEOComplement([
+        'addAutoPrefix' => false,
+        'addCategory' => false
+    ]);
+    if (!empty($seoComplement)) {
+        array_push($siteTitle, $seoComplement);
+    }
+
+    $metaDescription = $video['id'];
+} else {
+    array_push($siteTitle, __('Video Not Available'));
+    //array_push($siteTitle, __("Home"));
+
+    $metaDescription = __('Video Not Available');
+}
+array_push($siteTitle, $config->getWebSiteTitle());
+$metaDescription .= $config->getPageTitleSeparator();
+
+$siteTitle = implode($config->getPageTitleSeparator(), $siteTitle);
