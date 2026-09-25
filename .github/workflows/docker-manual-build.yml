@@ -12,7 +12,7 @@ on:
         description: "Image tag to build/push"
         required: false
         type: string
-        default: "avideo:manual"
+        default: "andreson09thiago/avideo:latest"
 
 permissions:
   contents: read
@@ -43,6 +43,6 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: ${{ inputs.push }}
-          tags: ${{ inputs.tag || secrets.DOCKERHUB_IMAGE || 'avideo:1' }}
+          tags: ${{ inputs.tag || secrets.DOCKERHUB_IMAGE || 'andreson09thiago/avideo:1' }}
           context: .
           file: ./Dockerfile.avideo
